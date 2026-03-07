@@ -38,13 +38,14 @@ function do_next_interval(my_pomo){
     time.textContent = my_pomo.formatted_time();
 
     paused = false;
-
+    
     timerInterval = setInterval(() => {
 
         if(paused) return;
 
         my_pomo.pass_time();
         time.textContent = my_pomo.formatted_time();
+
 
         if(my_pomo.time_left == 0){
             my_pomo.pass_time();

@@ -264,13 +264,7 @@ saveButton.addEventListener("click", () => {
 
 // XP Button
 addXPButton.addEventListener("click", () => {
-    playerData.xpProgress += xpPerMin;
-    if (playerData.xpProgress >= xpPerLevel) {
-        playerData.level++;
-        playerData.xpProgress -= xpPerLevel;
-        playerData.tokens++;
-    }
-    updateUI();
+    
 });
 
 // Gacha Button
@@ -342,7 +336,18 @@ function do_next_interval(my_pomo){
 
         my_pomo.pass_time();
         time.textContent = my_pomo.formatted_time();
+        // xp update
+        if(my_pomo.working){
+            playerData.xpProgress += xpPerMin / 60;
+            if (playerData.xpProgress >= xpPerLevel) {
+                playerData.level++;
+                playerData.xpProgress -= xpPerLevel;
+                playerData.tokens++;
+            }
+            updateUI();
+        }
 
+        // resets timer
         if(my_pomo.time_left == 0){
             my_pomo.pass_time();
             clearInterval(timerInterval);
@@ -351,7 +356,7 @@ function do_next_interval(my_pomo){
             start_button.disabled = false
         }
 
-    }, 10);
+    }, 15);
 
     
 }
