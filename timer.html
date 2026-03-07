@@ -10,6 +10,14 @@
 
 <div id="time-left"></div>
 
+<style>
+#time-left {
+  color: rgb(71, 26, 82);
+  font-size: 24px;
+  font-weight: bold;
+}
+</style>
+
 <script>
 
 function do_next_interval(my_pomo){
@@ -24,7 +32,7 @@ function do_next_interval(my_pomo){
          if(my_pomo.time_left == 0){
             my_pomo.pass_time()
             clearInterval(interval);
-         }
+         }  
     }, 10)
 
     /*
