@@ -1,12 +1,11 @@
 <html>
 <head>
-    <title>Pomodoro Timer</title>
+<title>Pomodoro Timer</title>
 </head>
+
 <body>
 
 <audio id="myAudio" src="loud_alarm_sound.mp3" preload="auto"></audio>
-
-<body>
 
 <div id="time-left"></div>
 
@@ -20,29 +19,39 @@
 
 <script>
 
+let timerInterval = null;
+let paused = false;
+
 function do_next_interval(my_pomo){
+
     const time = document.getElementById("time-left");
 
     time.textContent = my_pomo.formatted_time();
 
-    const interval = setInterval(() => {
-         my_pomo.pass_time()
-         time.textContent = my_pomo.formatted_time();
+    paused = false;
 
-         if(my_pomo.time_left == 0){
-            my_pomo.pass_time()
-            clearInterval(interval);
-         }  
-    }, 10)
+    timerInterval = setInterval(() => {
 
-    /*
-    while(my_pomo.iterations < 1){
-        const countdownInterval = setTimeout(1000)
-        my_pomo.pass_time()
+        if(paused) return;
+
+        my_pomo.pass_time();
         time.textContent = my_pomo.formatted_time();
-    }
 
-    */
+        if(my_pomo.time_left == 0){
+            my_pomo.pass_time();
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+
+    }, 10);
+}
+
+function pauseTimer(){
+    paused = true;
+}
+
+function resumeTimer(){
+    paused = false;
 }
 
 function playAudio() {
@@ -54,7 +63,7 @@ class pomo_timer {
     constructor(work_time = 25, break_time = 5){
         this.work = work_time;
         this.break = break_time;
-        this.iterations = 0
+        this.iterations = 0;
 
         this.time_left = work_time * 60;
         this.working = true;
@@ -67,9 +76,10 @@ class pomo_timer {
 
             if(this.working){
                 this.time_left = this.break * 60;
-            } else {
+            }
+            else{
                 this.time_left = this.work * 60;
-                this.iterations += 1
+                this.iterations += 1;
             }
 
             this.working = !this.working;
@@ -77,7 +87,6 @@ class pomo_timer {
         else{
             this.time_left -= 1;
         }
-        
     }
 
     formatted_time(){
@@ -92,6 +101,8 @@ const my_pomo = new pomo_timer()
 </script>
 
 <button onclick="do_next_interval(my_pomo)">Start</button>
+<button onclick="pauseTimer()">Pause</button>
+<button onclick="resumeTimer()">Resume</button>
 
 </body>
 </html>
