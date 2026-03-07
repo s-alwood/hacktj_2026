@@ -12,18 +12,20 @@
 
 <script>
 
-function run_pomo(){
-    const my_pomo = new pomo_timer(1, 1)
+function do_next_interval(my_pomo){
     const time = document.getElementById("time-left");
+
+    time.textContent = my_pomo.formatted_time();
 
     const interval = setInterval(() => {
          my_pomo.pass_time()
          time.textContent = my_pomo.formatted_time();
 
-         if(my_pomo.iterations >= 1){
+         if(my_pomo.time_left == 0){
+            my_pomo.pass_time()
             clearInterval(interval);
          }
-    }, 1000)
+    }, 10)
 
     /*
     while(my_pomo.iterations < 1){
@@ -51,7 +53,6 @@ class pomo_timer {
     }
 
     pass_time(){
-        this.time_left -= 1;
         if(this.time_left == 0){
 
             playAudio();
@@ -65,20 +66,24 @@ class pomo_timer {
 
             this.working = !this.working;
         }
+        else{
+            this.time_left -= 1;
+        }
+        
     }
 
     formatted_time(){
         const minutes = Math.floor(this.time_left/60);
-        const seconds = Math.floor(this.time_left % 60)
-                          .toString()
-                          .padStart(2, "0");
+        const seconds = Math.floor(this.time_left % 60).toString().padStart(2, "0");
         return `${minutes}:${seconds}`;
     }
 }
 
+const my_pomo = new pomo_timer()
+
 </script>
 
-<button onclick="run_pomo()">Run Pomodoro</button>
+<button onclick="do_next_interval(my_pomo)">Start</button>
 
 </body>
 </html>
