@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+#circle {
+    width: 10px;
+    height: 10px;
+    background-color: rgb(235, 235, 103);
+    border-radius: 50%;
+    margin: 20px;
+    position:absolute;
+}
+
+#xpContainer {
+    width: 300px;
+    height: 25px;
+    background-color: #d7d7d7;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+#xpBar {
+    width: 0%;
+    height: 100%;
+    background-color: rgb(115, 231, 142);
+    transition: width 0.3s;
+}
+
+#tokenDisplay{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:20px;
+}
+
+#tokenIcon{
+    width:20px;
+}
+
+#skinCircle{
+    width:100px;
+    height:100px;
+    border-radius:50%;
+    background:gray;
+    margin-top:20px;
+}
+
+/* timer section */
+
+#time-left {
+    color: rgb(71, 26, 82);
+    font-size: 24px;
+    font-weight: bold;
+}
+
+</style>
+</head>
+
+<body>
+
+    <audio id="myAudio" src="loud_alarm_sound.mp3" preload="auto"></audio>
+
+    <div id="time-left"></div>
+
+        
+    <button onclick="do_next_interval(my_pomo)" id="start_button">Start</button>
+    <button onclick="pause_resume()" id="p-r_button" >Pause/Resume</button>
+
+    <div id="xpContainer">
+        <div id="xpBar"></div>
+    </div>
+
+    <div id="circle"></div>
+
+    <button id="xpButton">Pass 1 minute (test)</button>
+
+    <div id="tokenDisplay">
+        <img src="images/token.png" id="tokenIcon" width="20px" height="20px">
+        <span id="tokenText">Tokens: 0</span>
+    </div>
+
+    <button id="gachaButton">Gacha!</button>
+    <div id="gachaHelperText"></div>
+
+    <div id="result">
+        <div id="skinNewText"></div>
+        <div id="skinCircle"></div>
+        <p id="skinName"></p>
+        <p id="skinRarity"></p>
+        <p id="skinChance"></p>
+    </div>
+
+    <h3>My Inventory</h3>
+    <div id="inventoryPanel" style="max-height:300px; overflow-y:auto; border:1px solid #ccc; padding:10px;">
+        <!-- Inventory items will appear here -->
+    </div>
+
+    <button id="saveButton">Save Progress</button>
+
+<script>
+let playerData;
+const xpPerMin = 1;
+const xpPerLevel = 25;
+const x = 200;
+const y = 200;
+const maxSize = 100;
+
+// DOM Elements
+const circle = document.getElementById("circle");
+const tokenText = document.getElementById("tokenText");
+const xpBar = document.getElementById("xpBar");
+const addXPButton = document.getElementById("xpButton");
+const saveButton = document.getElementById("saveButton");
+const gachaButton = document.getElementById("gachaButton");
+const gachaHelperText = document.getElementById("gachaHelperText");
+const skinCircle = document.getElementById("skinCircle");
+const skinName = document.getElementById("skinName");
+const skinRarity = document.getElementById("skinRarity");
+const skinChance = document.getElementById("skinChance");
+const skinNewText = document.getElementById("skinNewText");
+
+// Skin data
+const chances = [
+    {rarity: "Common", chance:40},
+    {rarity: "Uncommon", chance:30},
+    {rarity: "Rare", chance:14},
+    {rarity: "Epic", chance:5},
+    {rarity: "Legendary", chance:1}
+];
+
+const skins = [
+    // Common
+    {name:"Basic Yellow", rarity:"Common", rgb:[255,255,163]},
+    {name:"Soft Gray", rarity:"Common", rgb:[200,200,200]},
+    {name:"Light Sky", rarity:"Common", rgb:[173,216,230]},
+    {name:"Pale Mint", rarity:"Common", rgb:[189,252,201]},
+    // Uncommon
+    {name:"Fresh Lime", rarity:"Uncommon", rgb:[124,252,0]},
+    {name:"Ocean Blue", rarity:"Uncommon", rgb:[28,107,160]},
+    {name:"Lavender Mist", rarity:"Uncommon", rgb:[200,162,255]},
+    {name:"Peach Cream", rarity:"Uncommon", rgb:[255,218,185]},
+    // Rare
+    {name:"Forest Green", rarity:"Rare", rgb:[34,139,34]},
+    {name:"Royal Blue", rarity:"Rare", rgb:[65,105,225]},
+    {name:"Crimson Red", rarity:"Rare", rgb:[220,20,60]},
+    {name:"Deep Violet", rarity:"Rare", rgb:[148,0,211]},
+    // Epic
+    {name:"Salmon Pink", rarity:"Epic", rgb:[250,128,114]},
+    {name:"Neon Cyan", rarity:"Epic", rgb:[0,255,255]},
+    {name:"Magenta Pulse", rarity:"Epic", rgb:[255,0,255]},
+    {name:"Amber Glow", rarity:"Epic", rgb:[255,191,0]},
+    // Legendary
+    {name:"Golden Glow", rarity:"Legendary", rgb:[255,215,0]},
+    {name:"Plasma Purple", rarity:"Legendary", rgb:[186,85,211]},
+    {name:"Radiant Aqua", rarity:"Legendary", rgb:[0,255,200]},
+    {name:"Inferno Orange", rarity:"Legendary", rgb:[255,69,0]}
+];
+
+// Reference to the inventory panel
+const inventoryPanel = document.getElementById("inventoryPanel");
+// Rarity colors
+const rarityColors = {
+    "Common": "#AAAAAA",
+    "Uncommon": "#00FF00",
+    "Rare": "#0000FF",
+    "Epic": "#FF00FF",
+    "Legendary": "#FFA500"
+};
+
+function updateUI() {
+    // XP circle sizing
+    const percent = (playerData.xpProgress / xpPerLevel) * 100;
+    const size = percent / 100 * maxSize;
+    circle.style.width = size + "px";
+    circle.style.height = size + "px";
+    circle.style.left = (x - size/2) + "px";
+    circle.style.top = (y - size/2) + "px";
+    xpBar.style.width = percent + "%";
+
+    // Tokens
+    tokenText.innerText = "Tokens: " + playerData.tokens;
+
+    // Set main XP circle color based on equipped skin
+    if (playerData.equippedSkin) {
+        const skin = skins.find(s => s.name === playerData.equippedSkin);
+        if (skin) {
+            circle.style.backgroundColor = `rgb(${skin.rgb[0]},${skin.rgb[1]},${skin.rgb[2]})`;
+        }
+    } else {
+        circle.style.backgroundColor = "rgb(235, 235, 103)"; // default color
+    }
+
+    // Update inventory panel
+    inventoryPanel.innerHTML = "";
+    playerData.inventory.forEach(skinNameStr => {
+        const skin = skins.find(s => s.name === skinNameStr);
+        if (skin) {
+            const itemDiv = document.createElement("div");
+            itemDiv.style.display = "flex";
+            itemDiv.style.alignItems = "center";
+            itemDiv.style.marginBottom = "5px";
+            itemDiv.style.padding = "2px 5px";
+            itemDiv.style.cursor = "pointer";
+            itemDiv.style.borderRadius = "5px";
+
+            // Highlight if equipped
+            if (playerData.equippedSkin === skin.name) {
+                itemDiv.style.backgroundColor = "#d0f0ff";
+            }
+
+            // Skin color circle
+            const colorCircle = document.createElement("div");
+            colorCircle.style.width = "20px";
+            colorCircle.style.height = "20px";
+            colorCircle.style.borderRadius = "50%";
+            colorCircle.style.backgroundColor = `rgb(${skin.rgb[0]},${skin.rgb[1]},${skin.rgb[2]})`;
+            colorCircle.style.marginRight = "10px";
+
+            // Skin name
+            const nameText = document.createElement("span");
+            nameText.innerText = skin.name;
+            nameText.style.marginRight = "10px";
+
+            // Rarity badge
+            const rarityText = document.createElement("span");
+            rarityText.innerText = skin.rarity;
+            rarityText.style.color = rarityColors[skin.rarity] || "#000";
+            rarityText.style.fontWeight = "bold";
+
+            itemDiv.appendChild(colorCircle);
+            itemDiv.appendChild(nameText);
+            itemDiv.appendChild(rarityText);
+            inventoryPanel.appendChild(itemDiv);
+
+            // Click event to equip skin
+            itemDiv.addEventListener("click", () => {
+                playerData.equippedSkin = skin.name;
+                updateUI(); // refresh colors and highlight
+            });
+        }
+    });
+}
+
+// Load playerData from localStorage or JSON
+const savedData = localStorage.getItem("playerData");
+if (savedData) {
+    playerData = JSON.parse(savedData);
+    updateUI();
+} else {
+    fetch("inventoryTest.json")
+        .then(r => r.json())
+        .then(data => {
+            playerData = data;
+            updateUI();
+        });
+}
+
+// Save button
+saveButton.addEventListener("click", () => {
+    if (!playerData) return;
+    localStorage.setItem("playerData", JSON.stringify(playerData));
+    alert("Progress saved!");
+});
+
+// XP Button
+addXPButton.addEventListener("click", () => {
+    
+});
+
+// Gacha Button
+gachaButton.addEventListener("click", () => {
+    if (playerData.tokens === 0) {
+        gachaHelperText.innerText = "Not Enough Tokens :(";
+        return;
+    }
+
+    let roll = Math.random() * 100;
+    let total = 0;
+    let chosenRarity = "Common";
+
+    for (let tier of chances) {
+        total += tier.chance;
+        if (roll <= total) {
+            chosenRarity = tier.rarity;
+            break;
+        }
+    }
+
+    let pool = skins.filter(skin => skin.rarity === chosenRarity);
+    let chosenSkin = pool[Math.floor(Math.random() * pool.length)];
+
+    // Update skin display
+    skinCircle.style.backgroundColor = `rgb(${chosenSkin.rgb[0]},${chosenSkin.rgb[1]},${chosenSkin.rgb[2]})`;
+    skinName.innerText = "Name: " + chosenSkin.name;
+    skinRarity.innerText = "Rarity: " + chosenSkin.rarity;
+    const rarityChance = chances.find(t => t.rarity === chosenSkin.rarity).chance;
+    skinChance.innerText = "Chance: " + (rarityChance).toFixed(2) + "%";
+
+    // Update playerData
+    playerData.tokens--;
+    if (!playerData.inventory.includes(chosenSkin.name)) {
+        playerData.inventory.push(chosenSkin.name);
+        skinNewText.innerText = "New!";
+    } else {
+        skinNewText.innerText = "Already Owned";
+    }
+
+    updateUI(); // refresh XP circle & tokens
+});
+
+// timer section
+
+time = document.getElementById("time-left");
+time.textContent = "00:00"
+
+
+let timerInterval = null;
+let paused = false;
+
+function do_next_interval(my_pomo){
+
+    const time = document.getElementById("time-left");
+    const start_button = document.getElementById("start_button");
+    const pause_resume_button = document.getElementById("p-r_button");
+
+    pause_resume_button.disabled = false
+    start_button.disabled = true
+
+    time.textContent = my_pomo.formatted_time();
+
+    paused = false;
+
+    timerInterval = setInterval(() => {
+
+        if(paused) return;
+
+        my_pomo.pass_time();
+        time.textContent = my_pomo.formatted_time();
+        // xp update
+        if(my_pomo.working){
+            playerData.xpProgress += xpPerMin / 60;
+            if (playerData.xpProgress >= xpPerLevel) {
+                playerData.level++;
+                playerData.xpProgress -= xpPerLevel;
+                playerData.tokens++;
+            }
+            updateUI();
+        }
+
+        // resets timer
+        if(my_pomo.time_left == 0){
+            my_pomo.pass_time();
+            clearInterval(timerInterval);
+            timerInterval = null;
+            pause_resume_button.disabled = true
+            start_button.disabled = false
+        }
+
+    }, 15);
+
+    
+}
+
+function pause_resume(){
+    paused = !paused;
+}
+
+function playAudio() {
+    var audio = document.getElementById("myAudio");
+    audio.play();
+}
+
+class pomo_timer {
+    constructor(work_time = 25, break_time = 5){
+        this.work = work_time;
+        this.break = break_time;
+        this.iterations = 0;
+
+        this.time_left = work_time * 60;
+        this.working = true;
+    }
+
+    pass_time(){
+        if(this.time_left == 0){
+
+            playAudio();
+
+            if(this.working){
+                this.time_left = this.break * 60;
+            }
+            else{
+                this.time_left = this.work * 60;
+                this.iterations += 1;
+            }
+
+            this.working = !this.working;
+        }
+        else{
+            this.time_left -= 1;
+        }
+    }
+
+    formatted_time(){
+        const minutes = Math.floor(this.time_left/60);
+        const seconds = Math.floor(this.time_left % 60).toString().padStart(2, "0");
+        return `${minutes}:${seconds}`;
+    }
+}
+
+const my_pomo = new pomo_timer()
+const pause_resume_button = document.getElementById("p-r_button");
+
+pause_resume_button.disabled = true
+
+// end of timer section
+</script>
+</body>
+</html>
