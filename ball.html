@@ -44,41 +44,58 @@
     background:gray;
     margin-top:20px;
 }
+
+/* timer section */
+
+#time-left {
+    color: rgb(71, 26, 82);
+    font-size: 24px;
+    font-weight: bold;
+}
+
 </style>
 </head>
 
 <body>
 
-<div id="xpContainer">
-    <div id="xpBar"></div>
-</div>
+    <audio id="myAudio" src="loud_alarm_sound.mp3" preload="auto"></audio>
 
-<div id="circle"></div>
+    <div id="time-left"></div>
 
-<button id="xpButton">Pass 1 minute (test)</button>
+        
+    <button onclick="do_next_interval(my_pomo)" id="start_button">Start</button>
+    <button onclick="pause_resume()" id="p-r_button" >Pause/Resume</button>
 
-<div id="tokenDisplay">
-    <img src="images/token.png" id="tokenIcon" width="20px" height="20px">
-    <span id="tokenText">Tokens: 0</span>
-</div>
+    <div id="xpContainer">
+        <div id="xpBar"></div>
+    </div>
 
-<button id="gachaButton">Gacha!</button>
-<div id="gachaHelperText"></div>
+    <div id="circle"></div>
 
-<div id="result">
-    <div id="skinNewText"></div>
-    <div id="skinCircle"></div>
-    <p id="skinName"></p>
-    <p id="skinRarity"></p>
-    <p id="skinChance"></p>
-</div>
+    <button id="xpButton">Pass 1 minute (test)</button>
 
-<h3>My Inventory</h3>
-<div id="inventoryPanel" style="max-height:300px; overflow-y:auto; border:1px solid #ccc; padding:10px;">
-    <!-- Inventory items will appear here -->
-</div>
+    <div id="tokenDisplay">
+        <img src="images/token.png" id="tokenIcon" width="20px" height="20px">
+        <span id="tokenText">Tokens: 0</span>
+    </div>
 
-<button id="saveButton">Save Progress</button>
+    <button id="gachaButton">Gacha!</button>
+    <div id="gachaHelperText"></div>
+
+    <div id="result">
+        <div id="skinNewText"></div>
+        <div id="skinCircle"></div>
+        <p id="skinName"></p>
+        <p id="skinRarity"></p>
+        <p id="skinChance"></p>
+    </div>
+
+    <h3>My Inventory</h3>
+    <div id="inventoryPanel" style="max-height:300px; overflow-y:auto; border:1px solid #ccc; padding:10px;">
+        <!-- Inventory items will appear here -->
+    </div>
+
+    <button id="saveButton">Save Progress</button>
 
 <script>
 let playerData;
@@ -296,6 +313,101 @@ gachaButton.addEventListener("click", () => {
 
     updateUI(); // refresh XP circle & tokens
 });
+
+// timer section
+
+time = document.getElementById("time-left");
+time.textContent = "00:00"
+
+
+let timerInterval = null;
+let paused = false;
+
+function do_next_interval(my_pomo){
+
+    const time = document.getElementById("time-left");
+    const start_button = document.getElementById("start_button");
+    const pause_resume_button = document.getElementById("p-r_button");
+
+    pause_resume_button.disabled = false
+    start_button.disabled = true
+
+    time.textContent = my_pomo.formatted_time();
+
+    paused = false;
+
+    timerInterval = setInterval(() => {
+
+        if(paused) return;
+
+        my_pomo.pass_time();
+        time.textContent = my_pomo.formatted_time();
+
+        if(my_pomo.time_left == 0){
+            my_pomo.pass_time();
+            clearInterval(timerInterval);
+            timerInterval = null;
+            pause_resume_button.disabled = true
+            start_button.disabled = false
+        }
+
+    }, 10);
+
+    
+}
+
+function pause_resume(){
+    paused = !paused;
+}
+
+function playAudio() {
+    var audio = document.getElementById("myAudio");
+    audio.play();
+}
+
+class pomo_timer {
+    constructor(work_time = 25, break_time = 5){
+        this.work = work_time;
+        this.break = break_time;
+        this.iterations = 0;
+
+        this.time_left = work_time * 60;
+        this.working = true;
+    }
+
+    pass_time(){
+        if(this.time_left == 0){
+
+            playAudio();
+
+            if(this.working){
+                this.time_left = this.break * 60;
+            }
+            else{
+                this.time_left = this.work * 60;
+                this.iterations += 1;
+            }
+
+            this.working = !this.working;
+        }
+        else{
+            this.time_left -= 1;
+        }
+    }
+
+    formatted_time(){
+        const minutes = Math.floor(this.time_left/60);
+        const seconds = Math.floor(this.time_left % 60).toString().padStart(2, "0");
+        return `${minutes}:${seconds}`;
+    }
+}
+
+const my_pomo = new pomo_timer()
+const pause_resume_button = document.getElementById("p-r_button");
+
+pause_resume_button.disabled = true
+
+// end of timer section
 </script>
 </body>
 </html>
