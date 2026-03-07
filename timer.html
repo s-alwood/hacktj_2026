@@ -1,0 +1,84 @@
+<html>
+<head>
+    <title>Pomodoro Timer</title>
+</head>
+<body>
+
+<audio id="myAudio" src="loud_alarm_sound.mp3" preload="auto"></audio>
+
+<body>
+
+<div id="time-left"></div>
+
+<script>
+
+function run_pomo(){
+    const my_pomo = new pomo_timer(1, 1)
+    const time = document.getElementById("time-left");
+
+    const interval = setInterval(() => {
+         my_pomo.pass_time()
+         time.textContent = my_pomo.formatted_time();
+
+         if(my_pomo.iterations >= 1){
+            clearInterval(interval);
+         }
+    }, 1000)
+
+    /*
+    while(my_pomo.iterations < 1){
+        const countdownInterval = setTimeout(1000)
+        my_pomo.pass_time()
+        time.textContent = my_pomo.formatted_time();
+    }
+
+    */
+}
+
+function playAudio() {
+    var audio = document.getElementById("myAudio");
+    audio.play();
+}
+
+class pomo_timer {
+    constructor(work_time = 25, break_time = 5){
+        this.work = work_time;
+        this.break = break_time;
+        this.iterations = 0
+
+        this.time_left = work_time * 60;
+        this.working = true;
+    }
+
+    pass_time(){
+        this.time_left -= 1;
+        if(this.time_left == 0){
+
+            playAudio();
+
+            if(this.working){
+                this.time_left = this.break * 60;
+            } else {
+                this.time_left = this.work * 60;
+                this.iterations += 1
+            }
+
+            this.working = !this.working;
+        }
+    }
+
+    formatted_time(){
+        const minutes = Math.floor(this.time_left/60);
+        const seconds = Math.floor(this.time_left % 60)
+                          .toString()
+                          .padStart(2, "0");
+        return `${minutes}:${seconds}`;
+    }
+}
+
+</script>
+
+<button onclick="run_pomo()">Run Pomodoro</button>
+
+</body>
+</html>
