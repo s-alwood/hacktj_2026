@@ -19,12 +19,21 @@
 
 <script>
 
+time = document.getElementById("time-left");
+time.textContent = "00:00"
+
+
 let timerInterval = null;
 let paused = false;
 
 function do_next_interval(my_pomo){
 
     const time = document.getElementById("time-left");
+    const start_button = document.getElementById("start_button");
+    const pause_resume_button = document.getElementById("p-r_button");
+
+    pause_resume_button.disabled = false
+    start_button.disabled = true
 
     time.textContent = my_pomo.formatted_time();
 
@@ -41,17 +50,17 @@ function do_next_interval(my_pomo){
             my_pomo.pass_time();
             clearInterval(timerInterval);
             timerInterval = null;
+            pause_resume_button.disabled = true
+            start_button.disabled = false
         }
 
     }, 10);
+
+    
 }
 
-function pauseTimer(){
-    paused = true;
-}
-
-function resumeTimer(){
-    paused = false;
+function pause_resume(){
+    paused = !paused;
 }
 
 function playAudio() {
@@ -100,9 +109,14 @@ const my_pomo = new pomo_timer()
 
 </script>
 
-<button onclick="do_next_interval(my_pomo)">Start</button>
-<button onclick="pauseTimer()">Pause</button>
-<button onclick="resumeTimer()">Resume</button>
+<button onclick="do_next_interval(my_pomo)" id="start_button">Start</button>
+<button onclick="pause_resume()" id="p-r_button" >Pause/Resume</button>
+
+<script>
+const pause_resume_button = document.getElementById("p-r_button");
+
+pause_resume_button.disabled = true
+</script>
 
 </body>
 </html>
