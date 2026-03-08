@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const addButton = document.getElementById('addButton');
     const taskList = document.getElementById('taskList');
     const token_disp = document.getElementById('token_display');
+    const clearButton = document.getElementById('resetButton');
 
     function addTask() {
         const taskText = taskInput.value.trim();
@@ -53,6 +54,24 @@ document.addEventListener('DOMContentLoaded', () => {
             addTask();
         }
     })
+
+    clearButton.addEventListener('click',
+        function clear_completed(){
+            to_remove = []
+            for(const child of taskList.children){
+                if(child.classList.contains('completed')){
+                    to_remove.push(child)
+                    //taskList.removeChild(child);
+                }
+            }
+            for (const child of to_remove) {
+                taskList.removeChild(child);
+            }
+            
+        }
+
+    )
+
 })
 
 
