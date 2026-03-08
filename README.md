@@ -1,2 +1,3 @@
 # hacktj_2026
-idk what we're gonna do but its gonna be fun
+Must have liveserver downloaded to run --> https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer
+
