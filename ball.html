@@ -5,9 +5,58 @@
 body {
         background-color: rgb(19, 0, 74);
         color: white;
-        font-family: sans-serif;
+        
         text-align: center;
+        font-family:"Potta One";
     }
+.container {
+    display:flex;
+    width:100%;
+    height:100vh;
+}
+
+.panel {
+    padding:16px;
+    border: 1px solid #ccc;
+}
+
+.panel-left {
+    flex-basis: 50%;
+}
+
+
+.panel-right {
+    flex-basis: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items:center;
+}
+
+.buttonRow {
+    display:flex;
+    gap:10px;
+    height:50px;
+}
+.buttonRow button {
+    flex:1;
+}
+button {
+    width:100%;
+    font-size: 18px;
+    padding:auto;
+    font-family:"Potta One";
+    
+}
+
+#circleArea{
+    height:50%;
+    width:100%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow:hidden;
+}
+
 #circle{
     width:150px;
     height:150px;
@@ -21,8 +70,8 @@ body {
 }
 
 #xpContainer {
-    width: 300px;
-    height: 25px;
+    width: 85%;
+    height: 40px;
     background-color: #d7d7d7;
     border-radius: 10px;
     overflow: hidden;
@@ -38,12 +87,15 @@ body {
 #tokenDisplay{
     display:flex;
     align-items:center;
+    font-size: 24px;
+    margin-top: 20px;
     gap:10px;
     margin-bottom:20px;
 }
 
 #tokenIcon{
-    width:20px;
+    width:50px;
+    height:auto;
 }
 
 #skinCircle{
@@ -58,34 +110,54 @@ body {
 
 #time-left {
     color: rgb(236, 252, 255);
-    font-size: 100px;
+    font-size: 150px;
     font-weight: bold;
+}
+
+#titleText {
+    font-size:42px;
+    font-family:"Chewy";
+    color:rgb(133, 133, 170)
 }
 
 </style>
 </head>
 
 <body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Potta+One&family=Chewy&display=swap" rel="stylesheet">
 
 <audio id="myAudio" src="loud_alarm_sound.mp3" preload="auto"></audio>
 
-<div id="time-left"></div>
+<div class="container">
+    <div class="panel panel-left">
+        <div id="settingsButton"></div> <!--todo-->
+        <div id="titleText">Pomoglow Firefly</div>
+        <div id="stage"></div>
+        <div id="time-left"></div>
+        <div class="buttonRow">
+            <button onclick="do_next_interval(my_pomo)" id="start_button">Start</button>
+            <button onclick="pause_resume()" id="p-r_button" >Pause/Resume</button>
+        </div>
+    </div>
+    <div class="panel panel-right">
+        <div id="inventoryButton"></div> <!--todo-->
+        <!--todo gacha button-->
+        <div id="circleArea">
+            <div id="circle"></div>
+        </div>
+        <div id="xpContainer">
+            <div id="xpBar"></div>
+        </div>
+        <div id="tokenDisplay">
+            <img src="images/token.png" id="tokenIcon" width="20px" height="20px">
+            <span id="tokenText">Tokens: 0</span>
+        </div>
 
-<button onclick="do_next_interval(my_pomo)" id="start_button">Start</button>
-<button onclick="pause_resume()" id="p-r_button" >Pause/Resume</button>
-
-<div id="xpContainer">
-    <div id="xpBar"></div>
+    </div>
 </div>
 
-<div id="circle"></div>
-
-<button id="xpButton">Pass 1 minute (test)</button>
-
-<div id="tokenDisplay">
-    <img src="images/token.png" id="tokenIcon" width="20px" height="20px">
-    <span id="tokenText">Tokens: 0</span>
-</div>
 
 <button id="gachaButton">Gacha!</button>
 <div id="gachaHelperText"></div>
@@ -106,18 +178,18 @@ body {
 <button id="saveButton">Save Progress</button>
 
 <script>
+
 let playerData;
 const xpPerMin = 1;
 const xpPerLevel = 25;
-const x = 200;
-const y = 200;
+const x = 0;
+const y = 0;
 const maxSize = 100;
 
 // DOM Elements
 const circle = document.getElementById("circle");
 const tokenText = document.getElementById("tokenText");
 const xpBar = document.getElementById("xpBar");
-const addXPButton = document.getElementById("xpButton");
 const saveButton = document.getElementById("saveButton");
 const gachaButton = document.getElementById("gachaButton");
 const gachaHelperText = document.getElementById("gachaHelperText");
@@ -219,11 +291,10 @@ const rarityColors = {
 function updateUI() {
     // XP circle sizing
     const percent = (playerData.xpProgress / xpPerLevel) * 100;
-    const size = percent / 100 * maxSize;
+    const size = (percent / 100 + 0.5)* maxSize;
     circle.style.width = size + "px";
     circle.style.height = size + "px";
-    circle.style.left = (x - size/2) + "px";
-    circle.style.top = (y - size/2) + "px";
+
     xpBar.style.width = percent + "%";
 
     // Tokens
@@ -311,10 +382,6 @@ saveButton.addEventListener("click", () => {
     alert("Progress saved!");
 });
 
-// XP Button
-addXPButton.addEventListener("click", () => {
-    
-});
 
 // Gacha Button
 gachaButton.addEventListener("click", () => {
@@ -461,8 +528,8 @@ class pomo_timer {
         return `${minutes}:${seconds}`;
     }
 }
-
 const my_pomo = new pomo_timer()
+
 const pause_resume_button = document.getElementById("p-r_button");
 
 pause_resume_button.disabled = true
