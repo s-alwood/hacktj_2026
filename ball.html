@@ -371,9 +371,10 @@ function playAudio() {
 }
 
 class pomo_timer {
-    constructor(work_time = 25, break_time = 5){
+    constructor(work_time = 25, break_time = 5, long_break_time = 15){
         this.work = work_time;
         this.break = break_time;
+        this.long_break = long_break_time
         this.iterations = 0;
 
         this.time_left = work_time * 60;
@@ -386,7 +387,12 @@ class pomo_timer {
             playAudio();
 
             if(this.working){
-                this.time_left = this.break * 60;
+                if(this.iterations % 3 == 2){
+                    this.time_left = this.long_break * 60;
+                }
+                else{
+                    this.time_left = this.break * 60;
+                }
             }
             else{
                 this.time_left = this.work * 60;
