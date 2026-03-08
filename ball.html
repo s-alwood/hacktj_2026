@@ -2,13 +2,22 @@
 <html>
 <head>
 <style>
-#circle {
-    width: 10px;
-    height: 10px;
-    background-color: rgb(235, 235, 103);
-    border-radius: 50%;
-    margin: 20px;
-    position:absolute;
+body {
+        background-color: rgb(19, 0, 74);
+        color: white;
+        font-family: sans-serif;
+        text-align: center;
+    }
+#circle{
+    width:150px;
+    height:150px;
+    border-radius:50%;
+    background: radial-gradient(circle at center, white 20%, rgb(141, 87, 87) 80%);
+}
+@keyframes glowPulse {
+    0% { box-shadow: var(--glow-small), var(--glow-medium); }
+    50% { box-shadow: var(--glow-big), var(--glow-huge); }
+    100% { box-shadow: var(--glow-small), var(--glow-medium); }
 }
 
 #xpContainer {
@@ -48,8 +57,8 @@
 /* timer section */
 
 #time-left {
-    color: rgb(71, 26, 82);
-    font-size: 24px;
+    color: rgb(236, 252, 255);
+    font-size: 100px;
     font-weight: bold;
 }
 
@@ -58,44 +67,43 @@
 
 <body>
 
-    <audio id="myAudio" src="loud_alarm_sound.mp3" preload="auto"></audio>
+<audio id="myAudio" src="loud_alarm_sound.mp3" preload="auto"></audio>
 
-    <div id="time-left"></div>
+<div id="time-left"></div>
 
-        
-    <button onclick="do_next_interval(my_pomo)" id="start_button">Start</button>
-    <button onclick="pause_resume()" id="p-r_button" >Pause/Resume</button>
+<button onclick="do_next_interval(my_pomo)" id="start_button">Start</button>
+<button onclick="pause_resume()" id="p-r_button" >Pause/Resume</button>
 
-    <div id="xpContainer">
-        <div id="xpBar"></div>
-    </div>
+<div id="xpContainer">
+    <div id="xpBar"></div>
+</div>
 
-    <div id="circle"></div>
+<div id="circle"></div>
 
-    <button id="xpButton">Pass 1 minute (test)</button>
+<button id="xpButton">Pass 1 minute (test)</button>
 
-    <div id="tokenDisplay">
-        <img src="images/token.png" id="tokenIcon" width="20px" height="20px">
-        <span id="tokenText">Tokens: 0</span>
-    </div>
+<div id="tokenDisplay">
+    <img src="images/token.png" id="tokenIcon" width="20px" height="20px">
+    <span id="tokenText">Tokens: 0</span>
+</div>
 
-    <button id="gachaButton">Gacha!</button>
-    <div id="gachaHelperText"></div>
+<button id="gachaButton">Gacha!</button>
+<div id="gachaHelperText"></div>
 
-    <div id="result">
-        <div id="skinNewText"></div>
-        <div id="skinCircle"></div>
-        <p id="skinName"></p>
-        <p id="skinRarity"></p>
-        <p id="skinChance"></p>
-    </div>
+<div id="result">
+    <div id="skinNewText"></div>
+    <div id="skinCircle"></div>
+    <p id="skinName"></p>
+    <p id="skinRarity"></p>
+    <p id="skinChance"></p>
+</div>
 
-    <h3>My Inventory</h3>
-    <div id="inventoryPanel" style="max-height:300px; overflow-y:auto; border:1px solid #ccc; padding:10px;">
-        <!-- Inventory items will appear here -->
-    </div>
+<h3>My Inventory</h3>
+<div id="inventoryPanel" style="max-height:300px; overflow-y:auto; border:1px solid #ccc; padding:10px;">
+    <!-- Inventory items will appear here -->
+</div>
 
-    <button id="saveButton">Save Progress</button>
+<button id="saveButton">Save Progress</button>
 
 <script>
 let playerData;
@@ -119,6 +127,37 @@ const skinRarity = document.getElementById("skinRarity");
 const skinChance = document.getElementById("skinChance");
 const skinNewText = document.getElementById("skinNewText");
 
+
+function setPulsingGlow(rgb) {
+
+const r = rgb[0];
+const g = rgb[1];
+const b = rgb[2];
+
+const size = circle.offsetWidth;
+
+const s1 = size * 0.15;
+const s2 = size * 0.30;
+const s3 = size * 0.40;
+const s4 = size * 0.60;
+
+const brightness = (r + g + b) / 3;
+const centerOpacity = brightness < 100 ? 0.4 : 0.7;
+
+circle.style.background =
+`radial-gradient(circle at center,
+white 0%,
+rgba(255,255,255,0.9) 15%,
+rgb(${r},${g},${b}) 60%,
+rgb(${r},${g},${b}) 100%)`;
+
+circle.style.setProperty("--glow-small", `0 0 ${s1}px ${s1/2}px rgba(${r},${g},${b},0.45)`);
+circle.style.setProperty("--glow-medium", `0 0 ${s2}px ${s2/2}px rgba(${r},${g},${b},0.35)`);
+circle.style.setProperty("--glow-big", `0 0 ${s3}px ${s3/2}px rgba(${r},${g},${b},0.8)`);
+circle.style.setProperty("--glow-huge", `0 0 ${s4}px ${s4/2}px rgba(${r},${g},${b},0.6)`);
+
+circle.style.animation = "glowPulse 1.5s infinite alternate";
+}
 // Skin data
 const chances = [
     {rarity: "Common", chance:40},
@@ -129,31 +168,41 @@ const chances = [
 ];
 
 const skins = [
-    // Common
-    {name:"Basic Yellow", rarity:"Common", rgb:[255,255,163]},
-    {name:"Soft Gray", rarity:"Common", rgb:[200,200,200]},
-    {name:"Light Sky", rarity:"Common", rgb:[173,216,230]},
-    {name:"Pale Mint", rarity:"Common", rgb:[189,252,201]},
-    // Uncommon
-    {name:"Fresh Lime", rarity:"Uncommon", rgb:[124,252,0]},
-    {name:"Ocean Blue", rarity:"Uncommon", rgb:[28,107,160]},
-    {name:"Lavender Mist", rarity:"Uncommon", rgb:[200,162,255]},
-    {name:"Peach Cream", rarity:"Uncommon", rgb:[255,218,185]},
-    // Rare
-    {name:"Forest Green", rarity:"Rare", rgb:[34,139,34]},
-    {name:"Royal Blue", rarity:"Rare", rgb:[65,105,225]},
-    {name:"Crimson Red", rarity:"Rare", rgb:[220,20,60]},
-    {name:"Deep Violet", rarity:"Rare", rgb:[148,0,211]},
-    // Epic
-    {name:"Salmon Pink", rarity:"Epic", rgb:[250,128,114]},
-    {name:"Neon Cyan", rarity:"Epic", rgb:[0,255,255]},
-    {name:"Magenta Pulse", rarity:"Epic", rgb:[255,0,255]},
-    {name:"Amber Glow", rarity:"Epic", rgb:[255,191,0]},
-    // Legendary
-    {name:"Golden Glow", rarity:"Legendary", rgb:[255,215,0]},
-    {name:"Plasma Purple", rarity:"Legendary", rgb:[186,85,211]},
-    {name:"Radiant Aqua", rarity:"Legendary", rgb:[0,255,200]},
-    {name:"Inferno Orange", rarity:"Legendary", rgb:[255,69,0]}
+// Common
+{name:"Soft Gray", rarity:"Common", rgb:[135,135,135]},
+{name:"Yellow-Green", rarity:"Common", rgb:[194,254,154]},
+{name:"Organic Orange", rarity:"Common", rgb:[193,121,21]},
+{name:"Light Lavender", rarity:"Common", rgb:[192,148,255]},
+{name:"Pale Mint", rarity:"Common", rgb:[174,213,191]},
+{name:"Boring brown", rarity:"Common", rgb:[106,62,62]},
+{name:"Obese Olive", rarity:"Common", rgb:[92,101,67]},
+
+// Uncommon
+{name:"Coral", rarity:"Uncommon", rgb:[255,128,128]},
+{name:"Pale Pink", rarity:"Uncommon", rgb:[255,194,194]},
+{name:"Neon Green", rarity:"Uncommon", rgb:[60,236,63]},
+{name:"Basic blue", rarity:"Uncommon", rgb:[82,66,158]},
+{name:"Mild Mauve", rarity:"Uncommon", rgb:[126,73,101]},
+{name:"Black black", rarity:"Uncommon", rgb:[0,0,0]},
+
+// Rare
+{name:"Baby blue", rarity:"Rare", rgb:[138,177,255]},
+{name:"Phoenix fire", rarity:"Rare", rgb:[255,77,0]},
+{name:"Dark Denim", rarity:"Rare", rgb:[0,33,133]},
+{name:"Power pink", rarity:"Rare", rgb:[212,0,255]},
+{name:"Pompous Purple", rarity:"Rare", rgb:[74,10,138]},
+
+// Epic
+{name:"Magenta Pulse", rarity:"Epic", rgb:[255,0,200]},
+{name:"Rose Petal", rarity:"Epic", rgb:[255,0,64]},
+{name:"Radiant Aqua", rarity:"Epic", rgb:[26,255,198]},
+{name:"Sacred Scarlet", rarity:"Epic", rgb:[175,65,65]},
+
+// Legendary
+{name:"Iridescent Indigo", rarity:"Legendary", rgb:[76,0,255]},
+{name:"Pure White", rarity:"Legendary", rgb:[255,255,255]},
+{name:"Golden Pearl of Ancient Warriors", rarity:"Legendary", rgb:[255,200,0]}
+    
 ];
 
 // Reference to the inventory panel
@@ -184,10 +233,10 @@ function updateUI() {
     if (playerData.equippedSkin) {
         const skin = skins.find(s => s.name === playerData.equippedSkin);
         if (skin) {
-            circle.style.backgroundColor = `rgb(${skin.rgb[0]},${skin.rgb[1]},${skin.rgb[2]})`;
+            setPulsingGlow(skin.rgb);
         }
     } else {
-        circle.style.backgroundColor = "rgb(235, 235, 103)"; // default color
+        setPulsingGlow([235,235,103]);
     }
 
     // Update inventory panel
@@ -338,7 +387,7 @@ function do_next_interval(my_pomo){
         time.textContent = my_pomo.formatted_time();
         // xp update
         if(my_pomo.working){
-            playerData.xpProgress += xpPerMin / 60;
+            playerData.xpProgress += xpPerMin / 30;
             if (playerData.xpProgress >= xpPerLevel) {
                 playerData.level++;
                 playerData.xpProgress -= xpPerLevel;
