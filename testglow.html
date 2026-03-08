@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Adaptive Glowing Orb with Gradient Center</title>
+    <style>
+        body {
+            background-color: rgb(19, 0, 74);
+            color: white;
+            font-family: sans-serif;
+            text-align: center;
+        }
+
+        #circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin: 50px auto;
+            position: relative;
+            transition: all 0.3s ease;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.6) 20%, #ff8080 80%);
+        }
+
+        /* Large white gradient circle at the center */
+        #circle::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 150px;  /* Increased size for the center circle */
+            height: 150px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,255,255,0.8) 30%, rgba(255,255,255,0) 70%);
+            transform: translate(-50%, -50%); /* Centering the gradient circle */
+        }
+
+        button {
+            margin: 5px;
+            padding: 8px 12px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        input[type="color"] {
+            margin: 20px;
+            width: 50px;
+            height: 50px;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Adaptive Glowing Orb with Gradient Center</h2>
+
+<div id="circle"></div>
+
+<div>
+    <input type="color" id="colorPicker" value="#ff8080">
+</div>
+
+<div>
+    <button onclick="setNoGlow()">No Glow</button>
+    <button onclick="setBoxShadowGlow()">Box Shadow Glow</button>
+    <button onclick="setDropShadowGlow()">Drop Shadow Glow</button>
+    <button onclick="setPulsingGlow()">Pulsing Glow</button>
+</div>
+
+<script>
+    const circle = document.getElementById("circle");
+    const colorPicker = document.getElementById("colorPicker");
+
+    let orbColor = colorPicker.value;
+    let pulseStyleSheet;
+
+    // Convert hex color to RGB
+    function hexToRgb(hex) {
+        let c = hex.replace("#", "");
+        if (c.length === 3) {
+            c = c.split("").map(x => x + x).join("");
+        }
+        const num = parseInt(c, 16);
+        return [num >> 16, (num >> 8) & 255, num & 255];
+    }
+
+    // Lighten the RGB color by a factor (scale 0 to 1)
+    function lightenColor(rgb, factor = 0.3) {
+        return rgb.map(value => Math.min(255, value + (255 - value) * factor));
+    }
+
+    // Calculate perceived brightness (0-255)
+    function getBrightness(rgb) {
+        const [r, g, b] = rgb;
+        return 0.299 * r + 0.587 * g + 0.114 * b;
+    }
+
+    function createPulseKeyframes(color) {
+        if (pulseStyleSheet) pulseStyleSheet.remove();
+        pulseStyleSheet = document.createElement("style");
+        pulseStyleSheet.innerHTML = `
+            @keyframes glowPulse {
+                0% { box-shadow: 0 0 20px 10px ${color}50, 0 0 40px 20px ${color}40; }
+                50% { box-shadow: 0 0 40px 20px ${color}90, 0 0 80px 40px ${color}70; }
+                100% { box-shadow: 0 0 20px 10px ${color}50, 0 0 40px 20px ${color}40; }
+            }
+        `;
+        document.head.appendChild(pulseStyleSheet);
+    }
+
+    function updateOrbColor() {
+        orbColor = colorPicker.value;
+        const rgb = hexToRgb(orbColor);
+        const brightness = getBrightness(rgb);
+
+        // Lighten the color for the white center of the orb
+        const lightColor = lightenColor(rgb, 0.5);  // adjust lightness (0 to 1)
+
+        // Convert lightened color back to hex
+        const lightColorHex = `rgb(${lightColor[0]}, ${lightColor[1]}, ${lightColor[2]})`;
+
+        // Adjust opacity based on brightness
+        let whiteOpacity = Math.min(0.9, 0.2 + brightness / 255);
+        whiteOpacity = Math.max(0.2, whiteOpacity);
+
+        // Update gradient (use lightened color for the center)
+        circle.style.background = `radial-gradient(circle at center, ${lightColorHex} ${whiteOpacity * 100}%, ${orbColor} 80%)`;
+
+        // Update glow effects if active
+        if (circle.style.animation.includes("glowPulse")) {
+            createPulseKeyframes(orbColor);
+            circle.style.animation = "glowPulse 1.5s infinite alternate";
+        }
+        if (circle.style.boxShadow !== "none" && !circle.style.animation) {
+            circle.style.boxShadow = `0 0 15px 8px ${orbColor}80, 0 0 30px 16px ${orbColor}50`;
+        }
+        if (circle.style.filter.includes("drop-shadow")) {
+            circle.style.filter = `drop-shadow(0 0 25px ${orbColor}B3)`;
+        }
+    }
+
+    colorPicker.addEventListener("input", updateOrbColor);
+
+    function setNoGlow() {
+        circle.style.boxShadow = "none";
+        circle.style.filter = "none";
+        circle.style.animation = "none";
+    }
+
+    function setBoxShadowGlow() {
+        circle.style.animation = "none";
+        circle.style.filter = "none";
+        circle.style.boxShadow = `0 0 15px 8px ${orbColor}80, 0 0 30px 16px ${orbColor}50`;
+    }
+
+    function setDropShadowGlow() {
+        circle.style.animation = "none";
+        circle.style.boxShadow = "none";
+        circle.style.filter = `drop-shadow(0 0 25px ${orbColor}B3)`;
+    }
+
+    function setPulsingGlow() {
+        createPulseKeyframes(orbColor);
+        circle.style.boxShadow = "none";
+        circle.style.filter = "none";
+        circle.style.animation = "glowPulse 1.5s infinite alternate";
+    }
+
+    // initialize
+    updateOrbColor();
+</script>
+
+</body>
+</html>
