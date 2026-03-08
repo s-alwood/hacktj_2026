@@ -19,7 +19,7 @@ body {
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    width: 300px;
+    width: 500px;
 }
 
 
@@ -34,6 +34,7 @@ body {
 
 button {
     padding: 8px 12px;
+    margin:2px;
     background-color: #28a745;
     color: white;
     border: none;
@@ -48,6 +49,8 @@ button:hover {
 #taskList {
     list-style-type: none;
     padding: 0;
+    height: 150px;
+    overflow-y:scroll
 }
 
 li {
