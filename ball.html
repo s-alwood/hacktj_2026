@@ -3,12 +3,14 @@
 <head>
 <style>
 body {
-        background-color: rgb(19, 0, 74);
+        background-color: rgb(17, 10, 38);
         color: white;
         
         text-align: center;
         font-family:"Potta One";
     }
+
+
 .container {
     display:flex;
     width:100%;
@@ -30,8 +32,8 @@ body {
     display: flex;
     flex-direction: column;
     align-items:center;
+    position: relative;
 }
-
 .buttonRow {
     display:flex;
     gap:10px;
@@ -43,7 +45,6 @@ body {
 button {
     width:100%;
     font-size: 18px;
-    padding:auto;
     font-family:"Potta One";
     
 }
@@ -69,6 +70,148 @@ button {
     100% { box-shadow: var(--glow-small), var(--glow-medium); }
 }
 
+.gacha {
+    position: absolute;
+    top: 10px; /* Moves 10px down from its original position */
+    right: 10px; /* No horizontal movement */
+}
+
+.gachaBigButton {
+    margin-top:10px;
+    padding:16px 32px;
+    font-size:28px;
+    font-family:"Chewy";
+
+    border:none;
+    border-radius:40px;
+
+    background: radial-gradient(circle at center,
+        #f8b735 10%,
+        #ffa32b 70%,
+        #ff9029 100%
+    );
+
+    color:rgb(0, 0, 0);
+    cursor:pointer;
+
+    animation: glowPulse 1.5s infinite alternate;
+}
+
+.inventory {
+    position: absolute;
+    top: 10px; /* Moves 10px down from its original position */
+    right: 80px; /* Moves 20px left from its original position */
+}
+
+.littleButton {
+    width: 60px;
+    height: 60px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 24px;
+    cursor: pointer;
+
+    background-color: #eaad4cdc;
+    color: rgb(236, 252, 255);
+
+    border: none;
+    border-radius: 50%;
+
+
+}
+
+.material-symbols-outlined {
+    font-family: 'Material Symbols Outlined';
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    font-size: 32px;
+    color: rgb(236, 252, 255); /* optional */
+}
+
+/* Button effects */
+.littleButton:hover {
+    background-color: #eaa04cdc;
+    
+}
+button:hover {
+    transform: scale(1.1);
+}
+
+button:active {
+    opacity: 0.8;
+}
+
+/* Modal background */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    background-color: rgba(0, 0, 0, 0.37);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    opacity: 0;
+    z-index: -1;
+}
+
+/* Modal visible */
+.modal.open {
+    opacity: 1;
+    z-index: 999;
+}
+
+
+/* Modal box */
+.modal-inner {
+    position: relative;
+    font-family: "Chewy";
+    background-color: rgb(133, 133, 170);
+    color: rgb(225, 225, 225); /* make text inside modal black */
+    padding: 20px;
+    border-radius: 10px;
+
+    text-align: center;
+    width: 50vw;      /* 75% of viewport width */
+    height: 50vh;     /* 75% of viewport height */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+/* Back buttons for all modals */
+.backbtn, .backbtn2, .backbtn3 {
+    position: absolute; /* make it stick to top-left of modal */
+    top: 10px;          /* 10px from the top */
+    left: 10px;         /* 10px from the left */
+
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background-color: #8997b8dc;
+    border: none;
+
+    display: flex;          /* centers the icon inside */
+    align-items: center;    
+    justify-content: center;
+    cursor: pointer;
+
+    font-size: 20px;
+    color: white;
+}
+
+.backbtn:hover, .backbtn2:hover, .backbtn3:hover {
+    transform: scale(1.1);
+}
+
+
 #xpContainer {
     width: 85%;
     height: 40px;
@@ -80,7 +223,7 @@ button {
 #xpBar {
     width: 0%;
     height: 100%;
-    background-color: rgb(115, 231, 142);
+    background-color: #eaa04cdc;
     transition: width 0.3s;
 }
 
@@ -117,23 +260,94 @@ button {
 #titleText {
     font-size:42px;
     font-family:"Chewy";
-    color:rgb(133, 133, 170)
+    color:rgb(133, 133, 170);
 }
 
 </style>
 </head>
 
 <body>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Potta+One&family=Chewy&display=swap" rel="stylesheet">
 
 <audio id="myAudio" src="loud_alarm_sound.mp3" preload="auto"></audio>
 
+<div id="modal" class="modal">
+    <div class="modal-inner">
+        <button class = "backbtn" id="backbtn">
+            <span class="material-symbols-outlined">arrow_back_ios</span>
+        </button>
+        <h1>Settings</h1>
+        <p>Settings modal</p>
+    </div>
+</div>
+
+<div id="starmodal" class="modal">
+    <div class="modal-inner" style="display:flex; flex-direction:column; align-items:center">
+
+        <button id="backbtn2" class="backbtn2">
+            <span class="material-symbols-outlined">arrow_back_ios</span>
+        </button>
+
+        <h1>Gacha</h1>
+
+        <div style="display:flex; width:100%; flex-direction:row;">
+
+            <!-- Left column -->
+            <div id="gachaUI"
+                style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:0px;gap:5px;">
+
+                <button id="gachaButton" class="gachaBigButton">Play (1 Token)</button>
+
+                <div id="gachaHelperText" style="margin-top:20px;"></div>
+
+                <div id="result" style="margin-top:0px; display:flex; flex-direction:column; align-items:center;">
+                    <div id="skinNewText" style="font-weight:bold; color:rgb(229, 158, 17);"></div>
+                    <div id="skinCircle" style="width:80px; height:80px; border-radius:50%; background:gray; margin:10px;"></div>
+                    <p id="skinName" style="margin:0;"></p>
+                    <p id="skinRarity" style="margin:0;"></p>
+                    <p id="skinChance" style="margin:0;"></p>
+                </div>
+            </div>
+
+            <!-- Right column -->
+            <div id="gachaHistoryPanel"
+                style="flex:1; overflow-y:auto;padding:10px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:10px;">
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<div id="inventorymodal" class="modal">
+    <div class="modal-inner">
+        <button id="backbtn3" class="backbtn3">
+            <span class="material-symbols-outlined">arrow_back_ios</span>
+        </button>
+        <h1>My Inventory</h1>
+        <div id="inventoryPanel" style="display:flex; height:80%; width:100%;">
+            <!-- Left column: list -->
+            <div id="inventoryList" style="flex:1; overflow-y:auto; padding-right:10px;"></div>
+
+            <!-- Right column: pie chart -->
+            <div id="pieContainer" style="flex:1; position:relative; padding:20px;">
+                <canvas id="rarityPie" style="width:100%; height:100%; display:block;"></canvas>
+                <div id="pieLabel" style="position:absolute; pointer-events:none; font-size:14px; font-weight:bold; color:black;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <div class="container">
     <div class="panel panel-left">
-        <div id="settingsButton"></div> <!--todo-->
-        <div id="titleText">Pomoglow Firefly</div>
+        <button class= "littleButton" id="openModal">
+            <span class="material-symbols-outlined">settings</span>
+        </button>
+        <div id="titleText">PomoGlow Firefly</div>
         <div id="stage"></div>
         <div id="time-left"></div>
         <div class="buttonRow">
@@ -142,8 +356,14 @@ button {
         </div>
     </div>
     <div class="panel panel-right">
-        <div id="inventoryButton"></div> <!--todo-->
-        <!--todo gacha button-->
+        <div class="buttonRow" style="margin-left:auto; display:flex; gap:10px;">
+            <button class = "littleButton" id="inventory">
+                <span class="material-symbols-outlined">business_center</span> 
+            </button>
+            <button class = "littleButton" id="gacha">
+                <span class="material-symbols-outlined">star_shine</span>    
+            </button>
+        </div>
         <div id="circleArea">
             <div id="circle"></div>
         </div>
@@ -158,30 +378,13 @@ button {
     </div>
 </div>
 
-
-<button id="gachaButton">Gacha!</button>
-<div id="gachaHelperText"></div>
-
-<div id="result">
-    <div id="skinNewText"></div>
-    <div id="skinCircle"></div>
-    <p id="skinName"></p>
-    <p id="skinRarity"></p>
-    <p id="skinChance"></p>
-</div>
-
-<h3>My Inventory</h3>
-<div id="inventoryPanel" style="max-height:300px; overflow-y:auto; border:1px solid #ccc; padding:10px;">
-    <!-- Inventory items will appear here -->
-</div>
-
 <button id="saveButton">Save Progress</button>
 
 <script>
 
 let playerData;
 const xpPerMin = 1;
-const xpPerLevel = 25;
+const xpPerLevel = 24;
 const x = 0;
 const y = 0;
 const maxSize = 100;
@@ -198,6 +401,38 @@ const skinName = document.getElementById("skinName");
 const skinRarity = document.getElementById("skinRarity");
 const skinChance = document.getElementById("skinChance");
 const skinNewText = document.getElementById("skinNewText");
+const gachaHistoryPanel = document.getElementById("gachaHistoryPanel");
+const maxHistory = 7; // keep only last  pulls
+let gachaHistory = []; // array of {name, rarity}
+
+// Refactored modal logic using mapping
+const panels = {
+    openModal: 'modal',       // Settings
+    gacha: 'starmodal',       // Gacha
+    inventory: 'inventorymodal' // Inventory
+};
+
+for (const [buttonId, modalId] of Object.entries(panels)) {
+    const btn = document.getElementById(buttonId);
+    const modal = document.getElementById(modalId);
+
+    // Open modal when button clicked
+    btn.addEventListener('click', () => modal.classList.add('open'));
+
+    // Find corresponding back button inside the modal
+    const backBtn = modal.querySelector('button[id^="backbtn"]');
+    backBtn.addEventListener('click', () => modal.classList.remove('open'));
+}
+
+// Close modals when clicking outside the modal-inner
+document.querySelectorAll('.modal').forEach(modal => {
+    modal.addEventListener('click', (e) => {
+        // Only close if the click is on the background, not inside the panel
+        if (!e.target.closest('.modal-inner')) {
+            modal.classList.remove('open');
+        }
+    });
+});
 
 
 function setPulsingGlow(rgb) {
@@ -281,13 +516,12 @@ const skins = [
 const inventoryPanel = document.getElementById("inventoryPanel");
 // Rarity colors
 const rarityColors = {
-    "Common": "#AAAAAA",
-    "Uncommon": "#00FF00",
-    "Rare": "#0000FF",
-    "Epic": "#FF00FF",
-    "Legendary": "#FFA500"
+    "Common": "#C0C0C0",      // light gray
+    "Uncommon": "#A8E6A2",    // soft green
+    "Rare": "#A2C8F0",        // soft blue
+    "Epic": "#D8A2E6",        // soft purple
+    "Legendary": "#FFD59E"    // pastel orange/gold
 };
-
 function updateUI() {
     // XP circle sizing
     const percent = (playerData.xpProgress / xpPerLevel) * 100;
@@ -310,55 +544,175 @@ function updateUI() {
         setPulsingGlow([235,235,103]);
     }
 
-    // Update inventory panel
-    inventoryPanel.innerHTML = "";
+    // Update inventory list (left column)
+    const inventoryList = document.getElementById("inventoryList");
+    inventoryList.innerHTML = "";
     playerData.inventory.forEach(skinNameStr => {
         const skin = skins.find(s => s.name === skinNameStr);
-        if (skin) {
-            const itemDiv = document.createElement("div");
-            itemDiv.style.display = "flex";
-            itemDiv.style.alignItems = "center";
-            itemDiv.style.marginBottom = "5px";
-            itemDiv.style.padding = "2px 5px";
-            itemDiv.style.cursor = "pointer";
-            itemDiv.style.borderRadius = "5px";
+        if (!skin) return;
 
-            // Highlight if equipped
-            if (playerData.equippedSkin === skin.name) {
-                itemDiv.style.backgroundColor = "#d0f0ff";
-            }
+        const itemDiv = document.createElement("div");
+        itemDiv.style.display = "flex";
+        itemDiv.style.alignItems = "center";
+        itemDiv.style.marginBottom = "5px";
+        itemDiv.style.padding = "2px 5px";
+        itemDiv.style.cursor = "pointer";
+        itemDiv.style.borderRadius = "5px";
 
-            // Skin color circle
-            const colorCircle = document.createElement("div");
-            colorCircle.style.width = "20px";
-            colorCircle.style.height = "20px";
-            colorCircle.style.borderRadius = "50%";
-            colorCircle.style.backgroundColor = `rgb(${skin.rgb[0]},${skin.rgb[1]},${skin.rgb[2]})`;
-            colorCircle.style.marginRight = "10px";
-
-            // Skin name
-            const nameText = document.createElement("span");
-            nameText.innerText = skin.name;
-            nameText.style.marginRight = "10px";
-
-            // Rarity badge
-            const rarityText = document.createElement("span");
-            rarityText.innerText = skin.rarity;
-            rarityText.style.color = rarityColors[skin.rarity] || "#000";
-            rarityText.style.fontWeight = "bold";
-
-            itemDiv.appendChild(colorCircle);
-            itemDiv.appendChild(nameText);
-            itemDiv.appendChild(rarityText);
-            inventoryPanel.appendChild(itemDiv);
-
-            // Click event to equip skin
-            itemDiv.addEventListener("click", () => {
-                playerData.equippedSkin = skin.name;
-                updateUI(); // refresh colors and highlight
-            });
+        if (playerData.equippedSkin === skin.name) {
+            itemDiv.style.backgroundColor = "#eaa04cdc"; // highlight equipped
         }
+
+        const colorCircle = document.createElement("div");
+        colorCircle.style.width = "20px";
+        colorCircle.style.height = "20px";
+        colorCircle.style.borderRadius = "50%";
+        colorCircle.style.backgroundColor = `rgb(${skin.rgb[0]},${skin.rgb[1]},${skin.rgb[2]})`;
+        colorCircle.style.marginRight = "10px";
+
+        const nameText = document.createElement("span");
+        nameText.innerText = skin.name;
+        nameText.style.marginRight = "10px";
+
+        const rarityText = document.createElement("span");
+        rarityText.innerText = skin.rarity;
+        rarityText.style.color = rarityColors[skin.rarity] || "#000";
+        rarityText.style.fontWeight = "bold";
+
+        itemDiv.appendChild(colorCircle);
+        itemDiv.appendChild(nameText);
+        itemDiv.appendChild(rarityText);
+        inventoryList.appendChild(itemDiv);
+
+        itemDiv.addEventListener("click", () => {
+            playerData.equippedSkin = skin.name;
+            updateUI();
+        });
     });
+
+    // Update rarity pie chart (right column)
+    const canvas = document.getElementById("rarityPie");
+    const ctx = canvas.getContext("2d");
+
+    // Add padding so hover slices aren't cut off
+    const padding = 20;
+    canvas.width = canvas.offsetWidth - padding*2;
+    canvas.height = canvas.offsetHeight - padding*2;
+    const radius = Math.min(canvas.width, canvas.height) / 2;
+    const centerX = canvas.width / 2 + padding;
+    const centerY = canvas.height / 2 + padding;
+
+    // Count rarities
+    const rarityCount = { "Common":0, "Uncommon":0, "Rare":0, "Epic":0, "Legendary":0 };
+    playerData.inventory.forEach(name => {
+        const skin = skins.find(s => s.name === name);
+        if (skin) rarityCount[skin.rarity]++;
+    });
+
+    const total = Object.values(rarityCount).reduce((a,b)=>a+b,0);
+    let startAngle = -Math.PI / 2;
+    const slices = [];
+
+    Object.keys(rarityCount).forEach(rarity => {
+        const count = rarityCount[rarity];
+        if(count === 0) return;
+        const sliceAngle = (count/total) * 2 * Math.PI;
+        slices.push({rarity, startAngle, endAngle: startAngle + sliceAngle});
+        startAngle += sliceAngle;
+    });
+
+    function drawRarityPie() {
+    const canvas = document.getElementById("rarityPie");
+    const container = document.getElementById("pieContainer");
+    const label = document.getElementById("pieLabel");
+    const ctx = canvas.getContext("2d");
+
+    const containerWidth = container.clientWidth;
+    const containerHeight = container.clientHeight;
+    const padding = 20; // padding around the chart
+
+    // Perfect square minus padding
+    const size = Math.min(containerWidth, containerHeight) - padding * 2;
+    canvas.width = size + padding * 2;
+    canvas.height = size + padding * 2;
+    canvas.style.width = canvas.width + "px";
+    canvas.style.height = canvas.height + "px";
+
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = size / 2;
+
+    // Count rarities
+    const rarityCount = { "Common":0, "Uncommon":0, "Rare":0, "Epic":0, "Legendary":0 };
+    playerData.inventory.forEach(name => {
+        const skin = skins.find(s => s.name === name);
+        if(skin) rarityCount[skin.rarity]++;
+    });
+    const total = Object.values(rarityCount).reduce((a,b)=>a+b,0);
+
+    let startAngle = -Math.PI/2;
+    const slices = [];
+
+    Object.keys(rarityCount).forEach(rarity=>{
+        const count = rarityCount[rarity];
+        if(count===0) return;
+        const sliceAngle = (count/total)*2*Math.PI;
+        slices.push({rarity, startAngle, endAngle: startAngle+sliceAngle});
+        startAngle += sliceAngle;
+    });
+
+    function render(highlight=null){
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        slices.forEach(slice=>{
+            const mid = (slice.startAngle+slice.endAngle)/2;
+            const r = (slice.rarity===highlight)? radius*1.1 : radius;
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.arc(centerX, centerY, r, slice.startAngle, slice.endAngle);
+            ctx.closePath();
+            ctx.fillStyle = rarityColors[slice.rarity]||"#000";
+            ctx.fill();
+        });
+    }
+
+    render();
+
+    canvas.onmousemove = (e)=>{
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+        const x = mouseX - centerX;
+        const y = mouseY - centerY;
+        let angle = Math.atan2(y,x);
+        if(angle<-Math.PI/2) angle+=2*Math.PI;
+
+        let hovered = null;
+        slices.forEach(slice=>{
+            if(angle>=slice.startAngle && angle<=slice.endAngle) hovered = slice.rarity;
+        });
+
+        render(hovered);
+
+        if(hovered){
+            label.innerText = `${hovered}: ${rarityCount[hovered]}`;
+            // Keep label inside container
+            label.style.left = Math.min(mouseX + 10, canvas.width - 80) + "px";
+            label.style.top = Math.max(mouseY - 20, 0) + "px";
+            label.style.color = "navy";
+        } else {
+            label.innerText = "";
+        }
+    };
+
+    canvas.onmouseleave = ()=>{render(); label.innerText="";}
+}
+
+// Call on inventory update
+drawRarityPie();
+
+// Redraw on window resize
+window.addEventListener("resize", drawRarityPie);
+
 }
 
 // Load playerData from localStorage or JSON
@@ -383,12 +737,14 @@ saveButton.addEventListener("click", () => {
 });
 
 
-// Gacha Button
 gachaButton.addEventListener("click", () => {
-    if (playerData.tokens === 0) {
-        gachaHelperText.innerText = "Not Enough Tokens :(";
-        return;
-    }
+    // clear helper text when rolling
+    gachaHelperText.innerText = "";
+    if (playerData.tokens <= 0) {
+    gachaHelperText.innerText = "Not Enough Tokens :(";
+    gachaHelperText.style.color = "red";
+    return;
+}
 
     let roll = Math.random() * 100;
     let total = 0;
@@ -405,21 +761,55 @@ gachaButton.addEventListener("click", () => {
     let pool = skins.filter(skin => skin.rarity === chosenRarity);
     let chosenSkin = pool[Math.floor(Math.random() * pool.length)];
 
-    // Update skin display
+    // Update skin display (right column)
     skinCircle.style.backgroundColor = `rgb(${chosenSkin.rgb[0]},${chosenSkin.rgb[1]},${chosenSkin.rgb[2]})`;
     skinName.innerText = "Name: " + chosenSkin.name;
     skinRarity.innerText = "Rarity: " + chosenSkin.rarity;
+    skinRarity.style.color = rarityColors[chosenSkin.rarity] || "#000";
     const rarityChance = chances.find(t => t.rarity === chosenSkin.rarity).chance;
     skinChance.innerText = "Chance: " + (rarityChance).toFixed(2) + "%";
 
     // Update playerData
     playerData.tokens--;
+    let isNew = false;
     if (!playerData.inventory.includes(chosenSkin.name)) {
-        playerData.inventory.push(chosenSkin.name);
-        skinNewText.innerText = "New!";
+    playerData.inventory.push(chosenSkin.name);
+    skinNewText.innerText = "New!";
+    skinNewText.style.color = "#4cff4c"; // nice green
+    isNew = true;
     } else {
         skinNewText.innerText = "Already Owned";
+        skinNewText.style.color = "white";
     }
+
+    // Add to gacha history
+    gachaHistory.unshift({ name: chosenSkin.name, rarity: chosenSkin.rarity, owned: playerData.inventory.includes(chosenSkin.name) });
+    if (gachaHistory.length > maxHistory) gachaHistory.pop();
+
+    // Update history panel (left column)
+    gachaHistoryPanel.innerHTML = "<h3>Pull History</h3>"; // reset
+    gachaHistory.forEach(skin => {
+        const div = document.createElement("div");
+        div.style.display = "flex";
+        div.style.gap = "15px";
+        div.style.alignItems = "center";
+        div.style.justifyContent = "space-between";
+        div.style.padding = "4px 6px";
+        div.style.borderRadius = "5px";
+        div.style.backgroundColor = skin.owned ? "#2b2b3a" : "#3a1b1b"; // slightly different if owned
+        div.style.color = rarityColors[skin.rarity] || "#fff";
+        const skinData = skins.find(s => s.name === skin.name);
+
+        div.innerHTML = `
+        <span style="color: rgb(${skinData.rgb[0]},${skinData.rgb[1]},${skinData.rgb[2]}); font-weight:bold;">
+        ${skin.name}
+        </span>
+        
+        <span style="color:${rarityColors[skin.rarity]}; font-weight:bold;">
+        ${skin.rarity}
+        </span>`
+        ;gachaHistoryPanel.appendChild(div);
+    });
 
     updateUI(); // refresh XP circle & tokens
 });
@@ -458,7 +848,7 @@ function do_next_interval(my_pomo){
             if (playerData.xpProgress >= xpPerLevel) {
                 playerData.level++;
                 playerData.xpProgress -= xpPerLevel;
-                playerData.tokens++;
+                playerData.tokens += 100;
             }
             updateUI();
         }
