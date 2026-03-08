@@ -3,78 +3,118 @@
 }
 
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Potta One', cursive;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     height: 100vh;
     margin: 0;
-    background:#111;
+    background: #111;
 }
 
+.openModal {
+  position: absolute;
+  top: 10px; /* Moves 10px down from its original position */
+  left: 10px; /* Moves 20px right from its original position */
+}
+
+.Gacha {
+    position: absolute;
+    top: 10px; /* Moves 10px down from its original position */
+    right: 10px; /* No horizontal movement */
+}
+
+.inventory {
+    position: absolute;
+    top: 10px; /* Moves 10px down from its original position */
+    right: 80px; /* Moves 20px left from its original position */
+}
+
+
+/* Circular buttons */
 button {
-    padding: 10px 25px;
-    font-size: 16px;
-    cursor: pointer; 
-    background-color: #084704;
+    width: 60px;
+    height: 60px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 24px;
+    cursor: pointer;
+
+    background-color: #fdf216dc;
     color: white;
+
     border: none;
-    border-radius: 20px;
-    transition: background-color 0.3s ease;
+    border-radius: 50%;
+
     box-shadow: 0 1px 4px rgba(0,0,0,0.3);
 }
 
-button span {
-    display: none;
+/* Icon size */
+.material-symbols-outlined {
+    font-family: 'Material Symbols Outlined';
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    font-size: 28px;
+    color: white; /* optional */
 }
 
 
+/* Button effects */
+button:hover {
+    background-color: #fdf216dc;
+    transform: scale(1.1);
+}
+
 button:active {
     opacity: 0.8;
-} 
+}
 
+/* Modal background */
 .modal {
     position: fixed;
     top: 0;
     left: 0;
-    bottom: 0;
     right: 0;
-    background-color: rgba(0, 0, 0, 0.5);
+    bottom: 0;
+
+    background-color: rgba(0,0,0,0.5);
+
     display: flex;
     justify-content: center;
     align-items: center;
+
     opacity: 0;
     z-index: -1;
 }
 
+/* Modal visible */
 .modal.open {
     opacity: 1;
     z-index: 999;
 }
 
-/*.starmodal.open {
-    opacity:1;
-    z-index:999;
+.potta-one-regular {
+  font-family: "Potta One", system-ui;
+  font-weight: 400;
+  font-style: normal;
 }
 
-/*.starmodal-inner {
-    position: relative;
-    background-color: white;
-    padding: 15px 25px;
-    border-radius: 5px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
-    text-align: center;
-    width: 380px; /* also removed the space } */
 
+/* Modal box */
 .modal-inner {
     position: relative;
+
     background-color: white;
-    padding: 15px 25px;
+    padding: 20px;
     border-radius: 5px;
+
     box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+
     text-align: center;
-    width: 380px; /* also removed the space */
+    width: 380px;
 }
 
 .modal-inner h2 {
@@ -83,43 +123,123 @@ button:active {
 
 .modal-inner p {
     margin: 10px 0;
-    line-height: 24px
+    line-height: 24px;
 }
 
-.backbtn {
+.backbtn, .backbtn2, .backbtn3 {
     position: absolute;
     top: 10px;
     left: 10px;
 }
 
-.backbtn span:last-child {
-    display: none;
+
+.container {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 300px;
 }
 
-.backbtn2 {
-    position: absolute;
-    top: 10px;
-    left: 10px;
+.input-area {
+    display: flex;
+    margin-bottom: 15px;
 }
 
-.backbtn2 span:last-child {
-    display: none;
+#taskInput {
+    flex-grow: 1;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-right: 10px;
+}
+
+button {
+    padding: 8px 12px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
 }
 
 button:hover {
-    background-color: #053002;
+    background-color: #218838;
 }
 
-/*.darken-button {
-    background-color: #084704;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    padding: 10px 20px;
+#taskList {
+    list-style-type: none;
+    padding: 0;
+}
+
+li {
+    padding: 10px;
+    background-color: #e9e9e9;
+    margin-bottom: 5px;
+    border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.3s ease, filter 0.3s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-.darken-button:hover {
-    background-color: #053002;
+li.completed {
+    text-decoration: line-through;
+    color: gray;
+}
+
+/*
+.container {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+}
+
+h2 {
+    text-align: center;
+    color: #333;
+}
+
+.input-container {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+#taskInput {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px 0 0 5px;
+    outline: none;
+}
+
+#addButton {
+    padding: 10px 15px;
+    border: none;
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+    border-radius: 0 5px 5px 0;
+}
+
+#addButton:hover {
+    background-color: #45a049;
+}
+
+#taskList {
+    list-style-type: none;
+    padding: 0;
+}
+
+li {
+    background: #edeef0;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }

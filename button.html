@@ -6,9 +6,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Modal</title>
     <link rel="stylesheet" href="button.css" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" /></head>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Potta+One&display=swap" rel="stylesheet">
+</head> 
+
 <body>
-    <button id="openModal">
+    
+    <div class="container">
+        <h2>My To-Do List</h2>
+        <div class="input-container">
+            <input type="text" id="taskInput" placeholder="Add a new task...">
+            <button id="addButton">
+                <span class="material-symbols-outlined">add</span>
+            </button>
+        </div>
+        <ul id="taskList">
+            <!-- New tasks will be added here dynamically -->
+        </ul>
+    </div>
+
+    <button class= "openModal" id="openModal">
         <span class="material-symbols-outlined">settings</span>
     </button>
 
@@ -16,11 +35,14 @@
         <span class="material-symbols-outlined">star_shine</span>    
     </button>
 
+    <button class = "inventory" id="Inventory">
+        <span class="material-symbols-outlined">business_center</span> 
+    </button>
+
     <div id="modal" class="modal">
         <div class="modal-inner">
             <button class = "backbtn" id="backbtn">
                 <span class="material-symbols-outlined">arrow_back_ios</span>
-                <span>backbtn</span>
             </button>
             <h2>Settings</h2>
             <p>Settings modal</p>
@@ -31,10 +53,19 @@
         <div class="modal-inner">
             <button id="backbtn2" class="backbtn2">
                 <span class="material-symbols-outlined">arrow_back_ios</span>
-                <span>backbtn2</span>
             </button>
             <h2>Gacha</h2>
             <p>Star modal</p>
+        </div>
+    </div>
+
+    <div id="inventorymodal" class="modal">
+        <div class="modal-inner">
+            <button id="backbtn3" class="backbtn3">
+                <span class="material-symbols-outlined">arrow_back_ios</span>
+            </button>
+            <h2>Inventory</h2>
+            <p>Inventory modal</p>
         </div>
     </div>
 
