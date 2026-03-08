@@ -35,6 +35,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 // add to some sort of tracker of tasks completed during a pomo
             });
 
+            function handleKeydown(event) {
+            if (event.key === "Backspace") {
+                taskList.removeChild(li);
+                document.removeEventListener("keydown", handleKeydown);
+            }
+            }
+
+            li.addEventListener("mouseenter", () => {
+                document.addEventListener("keydown", handleKeydown);
+            });
+
+            li.addEventListener("mouseleave", () => {
+                document.removeEventListener("keydown", handleKeydown);
+            });
+
             // Make the task draggable
             li.draggable = true;
             li.addEventListener('dragstart', (e) => {
