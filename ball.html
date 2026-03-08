@@ -15,8 +15,16 @@ body {
     display:flex;
     width:100%;
     height:100vh;
+    
 }
 
+.todoContainer {
+    background: rgb(133, 133, 170);
+    margin:5px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 95%;
+}
 .panel {
     padding:16px;
     border: 1px solid #ccc;
@@ -46,8 +54,22 @@ button {
     width:100%;
     font-size: 18px;
     font-family:"Potta One";
+    cursor:pointer;
+    
     
 }
+
+.todoButton {
+    padding: 8px 12px;
+    margin:2px;
+    background-color: rgb(17, 10, 38);
+    color: white;
+    border: none;
+    border-radius: 4px;
+
+}
+
+
 
 #circleArea{
     height:50%;
@@ -63,12 +85,19 @@ button {
     height:150px;
     border-radius:50%;
     background: radial-gradient(circle at center, white 20%, rgb(141, 87, 87) 80%);
+    position: relative;   /* needed for wings */
+    display:flex;
+    justify-content:center;
+    align-items:center;
 }
+
 @keyframes glowPulse {
     0% { box-shadow: var(--glow-small), var(--glow-medium); }
     50% { box-shadow: var(--glow-big), var(--glow-huge); }
     100% { box-shadow: var(--glow-small), var(--glow-medium); }
 }
+
+
 
 .gacha {
     position: absolute;
@@ -263,6 +292,113 @@ button:active {
     color:rgb(133, 133, 170);
 }
 
+
+#taskInput {
+    flex-grow: 1;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-right: 10px;
+}
+
+#taskList {
+    list-style-type: none;
+    padding: 0;
+    height: 150px;
+    overflow-y:scroll
+}
+
+
+li {
+    padding: 10px;
+    background-color: #e9e9e9;
+    color: gray;
+    margin-bottom: 5px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+li.completed {
+    text-decoration: line-through;
+    color:#ff9029;
+
+}
+
+.sparkle {
+    position: fixed;
+    width: 6px;
+    height: 6px;
+
+    background: radial-gradient(circle,
+        rgba(255, 255, 255, 0.9) 0%,
+        rgba(255, 198, 114, 0.836) 40%,
+        rgba(255,255,255,0) 70%);
+
+    border-radius: 50%;
+
+    pointer-events: none;
+
+    animation: sparkleFade 2s ease-out forwards;
+}
+
+@keyframes sparkleFade {
+    0% {
+        opacity: 0;
+        transform: scale(0.3);
+    }
+
+    30% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(0.3);
+    }
+}
+
+/* Firefly wings */
+.wing {
+    position: absolute;
+    width: 75%;
+    height: 50%;
+    top: -5%;
+    background: rgba(255,255,255,0.45);
+    border-radius: 50%;
+    pointer-events: none;
+    filter: blur(2px);
+    z-index: -99;
+}
+
+/* left wing */
+.wing-left {
+    left: -35%;
+    transform-origin: right center;
+    animation: flapLeft 0.5s ease-in-out infinite alternate;
+}
+
+/* right wing */
+.wing-right {
+    right: -35%;
+    transform-origin: left center;
+    animation: flapRight 0.5s ease-in-out infinite alternate;
+}
+
+/* wing flapping animations */
+@keyframes flapLeft {
+    from { transform: rotate(35deg); }
+    to   { transform: rotate(10deg); }
+}
+
+@keyframes flapRight {
+    from { transform: rotate(-35deg); }
+    to   { transform: rotate(-10deg); }
+}
+
 </style>
 </head>
 
@@ -348,12 +484,61 @@ button:active {
             <span class="material-symbols-outlined">settings</span>
         </button>
         <div id="titleText">PomoGlow Firefly</div>
-        <div id="stage"></div>
+
+        <div id="stageText"></div>
         <div id="time-left"></div>
         <div class="buttonRow">
             <button onclick="do_next_interval(my_pomo)" id="start_button">Start</button>
             <button onclick="pause_resume()" id="p-r_button" >Pause/Resume</button>
         </div>
+
+
+    <div class="todoContainer"
+        style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:15px; margin:25px 0;">
+
+        <h2>My To-Do List</h2>
+
+        <div 
+            style="display:flex; align-items:center; gap:10px; width:90%;">
+
+            <input 
+                type="text"
+                id="taskInput"
+                placeholder="Add a new task..."
+                style="flex:1; height:30px; font-family: 'Chewy'">
+
+            <button 
+                class="todoButton"
+                id="addButton"
+                style="width:50px; height:50px; display:flex; align-items:center; justify-content:center; ">
+
+                <span class="material-symbols-outlined">add</span>
+
+            </button>
+
+        </div>
+
+        <ul id="taskList" style="width:100%; margin-top:15px;">
+            <!-- New tasks will be added here dynamically -->
+        </ul>
+
+        <button 
+            class="todoButton"
+            id="resetButton"
+            style="margin-top:10px;">
+            Reset Completed Tasks
+        </button>
+
+        <button 
+            class="todoButton"
+            id="reset-allButton"
+            style="margin-top:5px;">
+            Reset All Tasks
+        </button>
+
+    </div>
+
+
     </div>
     <div class="panel panel-right">
         <div class="buttonRow" style="margin-left:auto; display:flex; gap:10px;">
@@ -365,7 +550,10 @@ button:active {
             </button>
         </div>
         <div id="circleArea">
-            <div id="circle"></div>
+            <div id="circle">
+                <div class="wing wing-left"></div>
+                <div class="wing wing-right"></div>
+            </div>
         </div>
         <div id="xpContainer">
             <div id="xpBar"></div>
@@ -814,6 +1002,34 @@ gachaButton.addEventListener("click", () => {
     updateUI(); // refresh XP circle & tokens
 });
 
+function spawnSparkle() {
+
+const sparkle = document.createElement("div");
+sparkle.className = "sparkle";
+
+const x = Math.random() * window.innerWidth;
+const y = Math.random() * window.innerHeight;
+
+sparkle.style.left = x + "px";
+sparkle.style.top = y + "px";
+
+const size = Math.random() * 6 + 6;
+sparkle.style.width = size + "px";
+sparkle.style.height = size + "px";
+
+document.body.appendChild(sparkle);
+
+setTimeout(() => {
+    sparkle.remove();
+}, 2000);
+}
+
+setInterval(() => {
+    spawnSparkle();
+}, 100);
+
+
+
 // timer section
 
 time = document.getElementById("time-left");
@@ -844,11 +1060,12 @@ function do_next_interval(my_pomo){
         time.textContent = my_pomo.formatted_time();
         // xp update
         if(my_pomo.working){
+
             playerData.xpProgress += xpPerMin / 30;
             if (playerData.xpProgress >= xpPerLevel) {
                 playerData.level++;
                 playerData.xpProgress -= xpPerLevel;
-                playerData.tokens += 100;
+                playerData.tokens += 1;
             }
             updateUI();
         }
@@ -856,6 +1073,10 @@ function do_next_interval(my_pomo){
         // resets timer
         if(my_pomo.time_left == 0){
             my_pomo.pass_time();
+            const stageText = document.getElementById("stageText")
+            if(my_pomo.working){ stage  = "Working"; }
+            else{stage = "Break";}
+            stageText.innerText = stage
             clearInterval(timerInterval);
             timerInterval = null;
             pause_resume_button.disabled = true
@@ -910,6 +1131,7 @@ class pomo_timer {
         else{
             this.time_left -= 1;
         }
+
     }
 
     formatted_time(){
@@ -920,16 +1142,168 @@ class pomo_timer {
 
     stage(){
         if(self.working){
-            return "Working"
+            return "Working";
         }
-        return "Break"
+        else{
+            return "Break";
+        }
+        
     }
 }
 const my_pomo = new pomo_timer()
 
+
 const pause_resume_button = document.getElementById("p-r_button");
+const stageText = document.getElementById("stageText");
 
 pause_resume_button.disabled = true
+if(my_pomo.working){ stage  = "Working"; }
+else{stage = "Break";}
+stageText.innerText = stage
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    const taskInput = document.getElementById('taskInput');
+    const addButton = document.getElementById('addButton');
+    const taskList = document.getElementById('taskList');
+    const token_disp = document.getElementById('token_display');
+    const clearButton = document.getElementById('resetButton');
+    const clearAllButton = document.getElementById('reset-allButton');
+
+    function addTask() {
+        const taskText = taskInput.value.trim();
+
+        if (taskText !== '') {
+            // Create a new list item element
+
+            // i want to somehow wrap the element into a javascript class
+            const li = document.createElement('li');
+            li.innerHTML = taskText; // Add the task text to the list item
+            
+
+            // Append the new list item to the unordered list
+            taskList.appendChild(li);
+
+            // Clear the input field after adding the task
+            taskInput.value = '';
+
+             // Add click listener to toggle completion
+            li.addEventListener("click", function() {
+                li.classList.toggle("completed");
+                if(li.classList.contains('completed')){
+                    playerData.tokens += 1
+                }
+                else{
+                    playerData.tokens -= 1
+                }
+                updateUI();
+                token_disp.textContent = playerData.tokens
+                // add to some sort of tracker of tasks completed during a pomo
+            });
+
+            function handleKeydown(event) {
+            if (event.key === "Backspace") {
+                taskList.removeChild(li);
+                document.removeEventListener("keydown", handleKeydown);
+            }
+            }
+
+            li.addEventListener("mouseenter", () => {
+                document.addEventListener("keydown", handleKeydown);
+            });
+
+            li.addEventListener("mouseleave", () => {
+                document.removeEventListener("keydown", handleKeydown);
+            });
+
+            // Make the task draggable
+            li.draggable = true;
+            li.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', Array.from(taskList.children).indexOf(li));
+            });
+            li.addEventListener('dragover', (e) => {
+                e.preventDefault();
+            });
+            li.addEventListener('drop', (e) => {
+                e.preventDefault();
+                const draggedIndex = parseInt(e.dataTransfer.getData('text/plain'));
+                const draggedElement = taskList.children[draggedIndex];
+                const targetElement = e.target.closest('li');
+                if (draggedElement && targetElement && draggedElement !== targetElement) {
+                    const targetIndex = Array.from(taskList.children).indexOf(targetElement);
+                    if (draggedIndex < targetIndex) {
+                        taskList.insertBefore(draggedElement, targetElement.nextSibling);
+                    } else {
+                        taskList.insertBefore(draggedElement, targetElement);
+                    }
+                }
+            });
+        } else {
+            alert('Please enter a task!');
+        }
+    }
+
+    // Add event listener to the "Add" button for click events
+    addButton.addEventListener('click', addTask);
+
+    // Add event listener to the input field for the "Enter" key press
+    taskInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            addTask();
+        }
+    })
+
+    clearButton.addEventListener('click',
+        function clear_completed(){
+            to_remove = []
+            for(const child of taskList.children){
+                if(child.classList.contains('completed')){
+                    to_remove.push(child)
+                    //taskList.removeChild(child);
+                }
+            }
+            for (const child of to_remove) {
+                taskList.removeChild(child);
+            }
+            
+        }
+
+    )
+    clearButton.addEventListener('click',
+        function clear_completed(){
+            to_remove = []
+            for(const child of taskList.children){
+                if(child.classList.contains('completed')){
+                    to_remove.push(child)
+                    //taskList.removeChild(child);
+                }
+            }
+            for (const child of to_remove) {
+                taskList.removeChild(child);
+            }
+            
+        }
+
+    )
+
+    clearAllButton.addEventListener('click',
+        function clear_all(){
+            to_remove = []
+            for(const child of taskList.children){
+                to_remove.push(child)
+            }
+            for (const child of to_remove) {
+                taskList.removeChild(child);
+            }
+            
+        }
+
+    )
+
+})
+
+
+// add button to clear toggled tasks
 
 // end of timer section
 </script>
