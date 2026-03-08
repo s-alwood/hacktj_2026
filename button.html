@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta http.equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Modal</title>
+    <link rel="stylesheet" href="button.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" /></head>
+<body>
+    <button id="openModal">
+        <span class="material-symbols-outlined">settings</span>
+    </button>
+
+    <button class = "Gacha" id="Gacha">
+        <span class="material-symbols-outlined">star_shine</span>    
+    </button>
+
+    <div id="modal" class="modal">
+        <div class="modal-inner">
+            <button class = "backbtn" id="backbtn">
+                <span class="material-symbols-outlined">arrow_back_ios</span>
+                <span>backbtn</span>
+            </button>
+            <h2>Settings</h2>
+            <p>Settings modal</p>
+         </div>
+    </div>
+
+    <div id="starmodal" class="modal">
+        <div class="modal-inner">
+            <button id="backbtn2" class="backbtn2">
+                <span class="material-symbols-outlined">arrow_back_ios</span>
+                <span>backbtn2</span>
+            </button>
+            <h2>Gacha</h2>
+            <p>Star modal</p>
+        </div>
+    </div>
+
+    <script src="button.js"></script>
+</body>
+</html>
