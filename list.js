@@ -35,11 +35,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 // add to some sort of tracker of tasks completed during a pomo
             });
 
-            // Append to the list
-            taskList.appendChild(li);
-
-            // Clear the input field
-            taskInput.value = "";
+            // Make the task draggable
+            li.draggable = true;
+            li.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', Array.from(taskList.children).indexOf(li));
+            });
+            li.addEventListener('dragover', (e) => {
+                e.preventDefault();
+            });
+            li.addEventListener('drop', (e) => {
+                e.preventDefault();
+                const draggedIndex = parseInt(e.dataTransfer.getData('text/plain'));
+                const draggedElement = taskList.children[draggedIndex];
+                const targetElement = e.target.closest('li');
+                if (draggedElement && targetElement && draggedElement !== targetElement) {
+                    const targetIndex = Array.from(taskList.children).indexOf(targetElement);
+                    if (draggedIndex < targetIndex) {
+                        taskList.insertBefore(draggedElement, targetElement.nextSibling);
+                    } else {
+                        taskList.insertBefore(draggedElement, targetElement);
+                    }
+                }
+            });
         } else {
             alert('Please enter a task!');
         }
