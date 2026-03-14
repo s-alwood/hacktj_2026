@@ -152,6 +152,25 @@ button {
 
 }
 
+.textButton {
+    width: auto;
+    height: 60px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 24px;
+    cursor: pointer;
+    background-color: #ed5e16dc;
+    color: rgb(236, 252, 255);
+
+    border: none;
+    border-radius: 50%;
+
+
+}
+
 .material-symbols-outlined {
     font-family: 'Material Symbols Outlined';
     font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
@@ -213,6 +232,62 @@ button:active {
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
+}
+
+/* Tab buttons container */
+.modaltabs {
+    display: flex;
+    width:auto;
+    padding:10px;
+    margin-bottom: 20px;
+}
+
+/* Individual tab button: fills space, no outline */
+.modaltab {
+
+  flex: 1;               /* fills equal width */
+  text-align: center;
+  padding: 10px;
+  background: rgb(133, 133, 170);      /* base color */
+  color: white;
+  cursor: pointer;
+  outline: none;          /* remove default focus outline */
+  border: none;
+  user-select: white;
+}
+
+/* Darken color on hover/highlight */
+.modaltab:hover {
+  background: rgba(16, 16, 85, 0.137);;
+}
+
+.loginfield {
+    flex: 1;
+    text-align: center;
+    padding: 10px 0;
+    border-radius: 8px 8px 0 0;
+    background: #e0e0e0;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* Input textboxes for login/signup */
+.loginfield input {
+    width: 70%;
+    padding: 10px;
+    margin: 8px 0;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    font-size: 14px;
+    font-family: "Chewy";
+}
+.loginfield button {
+    font-family: "Potta One";
+    width:50%;
+    margin:8px 0;
+    outline:none;
+
 }
 
 /* Back buttons for all modals */
@@ -410,6 +485,7 @@ li.completed {
 
 <audio id="myAudio" src="assets/loud_alarm_sound.mp3" preload="auto"></audio>
 
+
 <div id="modal" class="modal">
     <div class="modal-inner">
         <button class = "backbtn" id="backbtn">
@@ -417,6 +493,36 @@ li.completed {
         </button>
         <h1>Settings</h1>
         <p>Settings modal</p>
+    </div>
+</div>
+
+
+<div id="loginmodal" class="modal">
+    <div class="modal-inner">
+        <button class = "backbtn" id="backbtn">
+            <span class="material-symbols-outlined">arrow_back_ios</span>
+        </button>
+        <h3 id="loginHelperText">Helper</h3>
+        <div class="modaltabs">
+            <button onclick="showTab('loginTab')" class="modaltab">Login</button>
+            <button onclick="showTab('signupTab')" class="modaltab">Signup</button>
+        </div>
+        <div id="loginTab" class="loginfield">
+            <input id="login-username" placeholder="Username">
+            <input id="login-password" type="password" placeholder="Password">
+            <button onclick="loginUser()">Login</button>
+        </div>
+        
+    
+        <div id="signupTab" class="loginfield" style="display:none;">
+            <input id="signup-username" placeholder="Username">
+            <input id="signup-password" type="password" placeholder="Password">
+            <button onclick="signupUser()">Signup</button>
+        </div>
+        
+        
+        
+
     </div>
 </div>
 
@@ -480,8 +586,11 @@ li.completed {
 
 <div class="container">
     <div class="panel panel-left">
-        <button class= "littleButton" id="openModal">
+        <button class= "littleButton" id="settings">
             <span class="material-symbols-outlined">settings</span>
+        </button>
+        <button class= "littleButton" id="login">
+            <span class="material-symbols-outlined">login</span>
         </button>
         <div id="titleText">PomoGlow Firefly</div>
 
@@ -570,6 +679,47 @@ li.completed {
 
 <script>
 
+const loginHelperText = document.getElementById("loginHelperText");
+// async pull json
+async function signupUser() {
+    const username = document.getElementById("signup-username").value;
+    const password = document.getElementById("signup-password").value;
+
+    const res = await fetch("/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
+    const msg = data.success ? "Signup successful!" : data.message;
+    alert(msg);
+    loginHelperText.innerText = msg;
+    }
+
+    async function loginUser() {
+    const username = document.getElementById("login-username").value;
+    const password = document.getElementById("login-password").value;
+
+    const res = await fetch("/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
+    if (data.success) {
+        msg = "Login successful!";
+        alert(msg);
+        loginHelperText.innerText = msg;
+        
+
+        localStorage.setItem("user", JSON.stringify(data.user));
+        document.getElementById("auth-panel").style.display = "none"; // hide panel
+        // Show your Pomodoro app here
+    } else {
+        alert(data.message);
+    }
+}
+
 let playerData;
 const xpPerMin = 1;
 const xpPerLevel = 24;
@@ -594,10 +744,11 @@ const maxHistory = 7; // keep only last  pulls
 let gachaHistory = []; // array of {name, rarity}
 
 // Refactored modal logic using mapping
-const panels = {
-    openModal: 'modal',       // Settings
+const panels = { // button id : modalId
+    settings: 'modal',       // Settings
     gacha: 'starmodal',       // Gacha
-    inventory: 'inventorymodal' // Inventory
+    inventory: 'inventorymodal', // Inventory
+    login: "loginmodal"
 };
 
 for (const [buttonId, modalId] of Object.entries(panels)) {
@@ -622,6 +773,10 @@ document.querySelectorAll('.modal').forEach(modal => {
     });
 });
 
+function showTab(tab) {
+    document.getElementById("loginTab").style.display = tab === "loginTab" ? "block" : "none";
+    document.getElementById("signupTab").style.display = tab === "signupTab" ? "block" : "none";
+}
 
 function setPulsingGlow(rgb) {
 
