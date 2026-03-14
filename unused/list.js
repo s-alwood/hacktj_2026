@@ -1,4 +1,4 @@
-let tokens = 0
+
 document.addEventListener('DOMContentLoaded', () => {
     const taskInput = document.getElementById('taskInput');
     const addButton = document.getElementById('addButton');
@@ -27,12 +27,12 @@ document.addEventListener('DOMContentLoaded', () => {
             li.addEventListener("click", function() {
                 li.classList.toggle("completed");
                 if(li.classList.contains('completed')){
-                    tokens += 1
+                    playerData.tokens += 1
                 }
                 else{
-                    tokens -= 1
+                    playerData.tokens -= 1
                 }
-                token_disp.textContent = tokens
+                token_disp.textContent = playerData.tokens
                 // add to some sort of tracker of tasks completed during a pomo
             });
 
