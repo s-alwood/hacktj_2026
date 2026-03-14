@@ -1,9 +1,7 @@
-from flask import Flask, send_from_directory
+from flask import Flask
 
-app = Flask(__name__, static_folder="public")
+app = Flask(__name__, static_folder="public", static_url_path="")
 
 @app.route("/")
 def home():
-   return send_from_directory("public", "index.html")
-
-print("SERVER STARTED")
+    return app.send_static_file("index.html")
