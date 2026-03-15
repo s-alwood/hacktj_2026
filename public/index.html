@@ -482,8 +482,7 @@ li.completed {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Potta+One&family=Chewy&display=swap" rel="stylesheet">
-
-<audio id="myAudio" src="assets/loud_alarm_sound.mp3" preload="auto"></audio>
+<audio id="myAudio" src="assets/audio/end.mp3" preload="auto"></audio>
 
 
 <div id="modal" class="modal">
@@ -678,6 +677,44 @@ li.completed {
 <button id="saveButton">Save Progress</button>
 
 <script>
+const sounds = {
+    open: new Audio("/assets/audio/open.mp3"),
+    equip: new Audio("/assets/audio/close.mp3"),
+    success: new Audio("/assets/audio/success.mp3"),
+    gacha: new Audio("/assets/audio/gacha.mp3"),
+    start: new Audio("/assets/audio/start.mp3"),
+    end: new Audio("/assets/audio/end.mp3"),
+    pause: new Audio("/assets/audio/pause.mp3"),
+    levelup: new Audio("/assets/audio/levelup.mp3")
+};
+
+function playSound(name) {
+    const s = sounds[name];
+    if (!s) return;
+    s.pause();
+    s.currentTime = 0;
+    s.volume = 0.25;
+    s.play();
+}
+
+function playSoundRandom(name) {
+    const base = sounds[name];
+    if (!base) return;
+
+    const s = new Audio(base.src);   // create a new audio instance
+
+    s.playbackRate = 0.8 + Math.random() * 0.4; // random pitch
+    s.volume = 0.2;
+
+    s.play();
+
+}
+
+document.querySelectorAll("button").forEach(btn => {
+    if (!btn.classList.contains("specialButton")) {
+        btn.addEventListener("click", () => playSoundRandom("open"));
+    }
+});
 
 const loginHelperText = document.getElementById("loginHelperText");
 
@@ -713,6 +750,7 @@ async function signupUser() {
     const msg = data.success ? "Signup successful!" : data.message;
     alert(msg);
     loginHelperText.innerText = msg;
+    playSound("success");
 
     if (data.success) {
         // save currentUser and playerData to reflect server copy
@@ -741,6 +779,7 @@ async function loginUser() {
         playerData = { ...data.user };   // initialize in-memory object
         document.getElementById("loginmodal").classList.remove('open');
         updateUI();
+        playSound("success");
 
     } else {
         alert(data.message);
@@ -942,6 +981,7 @@ function updateUI() {
 
         itemDiv.addEventListener("click", () => {
             playerData.equippedSkin = skin.id;
+            playSound("equip");
             updateUI();
         });
     });
@@ -1072,6 +1112,7 @@ gachaButton.addEventListener("click", () => {
     return;
 }
     playerData.tokens--;
+    playSound("gacha");
     let roll = Math.random() * 100;
     let total = 0;
     let chosenRarity = "Common";
@@ -1199,6 +1240,7 @@ function do_next_interval(my_pomo){
 
     paused = false;
 
+    playSound("start");
     timerInterval = setInterval(() => {
 
         if(paused) return;
@@ -1213,6 +1255,7 @@ function do_next_interval(my_pomo){
                 playerData.level++;
                 playerData.xpProgress -= xpPerLevel;
                 playerData.tokens += 1;
+                playSound("levelup");
             }
             updateUI();
         }
@@ -1237,6 +1280,7 @@ function do_next_interval(my_pomo){
 
 function pause_resume(){
     paused = !paused;
+    playSound("pause");
 }
 
 function playAudio() {
@@ -1258,7 +1302,7 @@ class pomo_timer {
     pass_time(){
         if(this.time_left == 0){
 
-            playAudio();
+            playSound("end");
 
             if(this.working){
                 if(this.iterations % 3 == 2){
@@ -1339,6 +1383,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 li.classList.toggle("completed");
                 if(li.classList.contains('completed')){
                     playerData.tokens += 1
+                    playSound("success");
                 }
                 else{
                     playerData.tokens -= 1

@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify 
 import json
 import os
 
@@ -6,7 +6,7 @@ print ("starting server")
 
 app = Flask(__name__, static_folder="public", static_url_path="")
 
-USERS_FILE = "users.json"
+USERS_FILE = "users.json" # 
 
 # Helper functions 
 def load_users():
@@ -78,11 +78,11 @@ def login():
 
     return jsonify({"success": True, "user": users[username]})
 
-@app.route("/saveProgress", methods=["POST"])
+@app.route("/saveProgress", methods=["POST"]) #
 def save_progress():
     data = request.json
     username = data.get("username")
-    progress = data.get("progress")  # your playerData object
+    progress = data.get("progress")  # your playerData object   
 
     users = load_users()
     if username not in users:
