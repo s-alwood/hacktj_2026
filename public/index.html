@@ -504,8 +504,8 @@ li.completed {
         </button>
         <h3 id="loginHelperText">Helper</h3>
         <div class="modaltabs">
-            <button onclick="showTab('loginTab')" class="modaltab">Login</button>
-            <button onclick="showTab('signupTab')" class="modaltab">Signup</button>
+            <button onclick="showTab('loginTab')" id="loginBtn" class="modaltab" style="background-color: #eaa04cdc";>Login</button>
+            <button onclick="showTab('signupTab')" id="signupBtn" class="modaltab">Signup</button>
         </div>
         <div id="loginTab" class="loginfield">
             <input id="login-username" placeholder="Username">
@@ -576,7 +576,7 @@ li.completed {
 
             <!-- Right column: pie chart -->
             <div id="pieContainer" style="flex:1; position:relative; padding:20px;">
-                <canvas id="rarityPie" style="width:100%; height:100%; display:block;"></canvas>
+                <canvas id="rarityPie" style="display:block;"></canvas>
                 <div id="pieLabel" style="position:absolute; pointer-events:none; font-size:14px; font-weight:bold; color:black;"></div>
             </div>
         </div>
@@ -680,23 +680,51 @@ li.completed {
 <script>
 
 const loginHelperText = document.getElementById("loginHelperText");
+
+
+
+let currentUser = null; // will store username + user data after login/signup
+let playerData = {
+    tokens: 10,
+    level: 1,
+    xpProgress: 0,
+    equippedSkin: 1,
+    gachaDuplicates: {},
+    gachaHistory: []
+    };
 // async pull json
 async function signupUser() {
     const username = document.getElementById("signup-username").value;
     const password = document.getElementById("signup-password").value;
+    console.log("signing up");
 
+    // send current playerData to server as starting stats
     const res = await fetch("/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ 
+            username, 
+            password,
+            progress: playerData  // <-- send current progress
+        })
     });
+
     const data = await res.json();
     const msg = data.success ? "Signup successful!" : data.message;
     alert(msg);
     loginHelperText.innerText = msg;
+
+    if (data.success) {
+        // save currentUser and playerData to reflect server copy
+        currentUser = { username, ...playerData };
+        // no need to change playerData; it's already default in-memory
+        document.getElementById("loginmodal").classList.remove('open');
     }
 
-    async function loginUser() {
+    updateUI();
+}
+
+async function loginUser() {
     const username = document.getElementById("login-username").value;
     const password = document.getElementById("login-password").value;
 
@@ -705,22 +733,20 @@ async function signupUser() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password })
     });
+
     const data = await res.json();
     if (data.success) {
-        msg = "Login successful!";
-        alert(msg);
-        loginHelperText.innerText = msg;
-        
+        alert("Login successful!");
+        currentUser = { username, ...data.user };
+        playerData = { ...data.user };   // initialize in-memory object
+        document.getElementById("loginmodal").classList.remove('open');
+        updateUI();
 
-        localStorage.setItem("user", JSON.stringify(data.user));
-        document.getElementById("auth-panel").style.display = "none"; // hide panel
-        // Show your Pomodoro app here
     } else {
         alert(data.message);
     }
 }
 
-let playerData;
 const xpPerMin = 1;
 const xpPerLevel = 24;
 const x = 0;
@@ -741,7 +767,8 @@ const skinChance = document.getElementById("skinChance");
 const skinNewText = document.getElementById("skinNewText");
 const gachaHistoryPanel = document.getElementById("gachaHistoryPanel");
 const maxHistory = 7; // keep only last  pulls
-let gachaHistory = []; // array of {name, rarity}
+let gachaHistory = [];
+
 
 // Refactored modal logic using mapping
 const panels = { // button id : modalId
@@ -774,8 +801,16 @@ document.querySelectorAll('.modal').forEach(modal => {
 });
 
 function showTab(tab) {
-    document.getElementById("loginTab").style.display = tab === "loginTab" ? "block" : "none";
-    document.getElementById("signupTab").style.display = tab === "signupTab" ? "block" : "none";
+    const loginTab = document.getElementById("loginTab");
+    const signupTab = document.getElementById("signupTab");
+
+
+    loginTab.style.display = tab === "loginTab" ? "block" : "none";
+    signupTab.style.display = tab === "signupTab" ? "block" : "none";
+
+    // highlight selected tab button
+    loginBtn.style.backgroundColor = tab === "loginTab" ? "#eaa04cdc" : "";
+    signupBtn.style.backgroundColor = tab === "signupTab" ? "#eaa04cdc" : "";
 }
 
 function setPulsingGlow(rgb) {
@@ -784,12 +819,12 @@ const r = rgb[0];
 const g = rgb[1];
 const b = rgb[2];
 
-const size =  20//circle.offsetWidth;
+const pulsingSize =  20//circle.offsetWidth;
 
-const s1 = size * 0.15;
-const s2 = size * 0.3;
-const s3 = size * 0.4;
-const s4 = size * 0.6;
+const s1 = pulsingSize * 0.15;
+const s2 = pulsingSize * 0.3;
+const s3 = pulsingSize * 0.4;
+const s4 = pulsingSize * 0.6;
 
 const brightness = (r + g + b) / 3;
 const centerOpacity = brightness < 100 ? 0.4 : 0.7;
@@ -810,50 +845,23 @@ circle.style.animation = "glowPulse 1.5s infinite alternate";
 }
 // Skin data
 const chances = [
-    {rarity: "Common", chance:40},
+    {rarity: "Common", chance:50},
     {rarity: "Uncommon", chance:30},
     {rarity: "Rare", chance:14},
     {rarity: "Epic", chance:5},
     {rarity: "Legendary", chance:1}
 ];
 
-const skins = [
-// Common
-{name:"Soft Gray", rarity:"Common", rgb:[135,135,135]},
-{name:"Yellow-Green", rarity:"Common", rgb:[194,254,154]},
-{name:"Organic Orange", rarity:"Common", rgb:[193,121,21]},
-{name:"Light Lavender", rarity:"Common", rgb:[192,148,255]},
-{name:"Pale Mint", rarity:"Common", rgb:[174,213,191]},
-{name:"Boring brown", rarity:"Common", rgb:[106,62,62]},
-{name:"Obese Olive", rarity:"Common", rgb:[92,101,67]},
+let skins = [];
 
-// Uncommon
-{name:"Coral", rarity:"Uncommon", rgb:[255,128,128]},
-{name:"Pale Pink", rarity:"Uncommon", rgb:[255,194,194]},
-{name:"Neon Green", rarity:"Uncommon", rgb:[60,236,63]},
-{name:"Basic blue", rarity:"Uncommon", rgb:[82,66,158]},
-{name:"Mild Mauve", rarity:"Uncommon", rgb:[126,73,101]},
-{name:"Black black", rarity:"Uncommon", rgb:[0,0,0]},
+async function loadSkins() {
+    const res = await fetch("skins.json");
+    skins = await res.json();
+    console.log("Loaded skins:", skins);
+}
 
-// Rare
-{name:"Baby blue", rarity:"Rare", rgb:[138,177,255]},
-{name:"Phoenix fire", rarity:"Rare", rgb:[255,77,0]},
-{name:"Dark Denim", rarity:"Rare", rgb:[0,33,133]},
-{name:"Power pink", rarity:"Rare", rgb:[212,0,255]},
-{name:"Pompous Purple", rarity:"Rare", rgb:[74,10,138]},
+loadSkins();
 
-// Epic
-{name:"Magenta Pulse", rarity:"Epic", rgb:[255,0,200]},
-{name:"Rose Petal", rarity:"Epic", rgb:[255,0,64]},
-{name:"Radiant Aqua", rarity:"Epic", rgb:[26,255,198]},
-{name:"Sacred Scarlet", rarity:"Epic", rgb:[175,65,65]},
-
-// Legendary
-{name:"Iridescent Indigo", rarity:"Legendary", rgb:[76,0,255]},
-{name:"Pure White", rarity:"Legendary", rgb:[255,255,255]},
-{name:"Golden Pearl of Ancient Warriors", rarity:"Legendary", rgb:[255,200,0]}
-    
-];
 
 // Reference to the inventory panel
 const inventoryPanel = document.getElementById("inventoryPanel");
@@ -868,9 +876,9 @@ const rarityColors = {
 function updateUI() {
     // XP circle sizing
     const percent = (playerData.xpProgress / xpPerLevel) * 100;
-    const size = (percent / 100 + 0.5)* maxSize;
-    circle.style.width = size + "px";
-    circle.style.height = size + "px";
+    const circleSize = (percent / 100 + 0.5)* maxSize;
+    circle.style.width = circleSize + "px";
+    circle.style.height = circleSize + "px";
 
     xpBar.style.width = percent + "%";
 
@@ -879,7 +887,7 @@ function updateUI() {
 
     // Set main XP circle color based on equipped skin
     if (playerData.equippedSkin) {
-        const skin = skins.find(s => s.name === playerData.equippedSkin);
+        const skin = skins.find(s => s.id === playerData.equippedSkin);
         if (skin) {
             setPulsingGlow(skin.rgb);
         }
@@ -887,11 +895,15 @@ function updateUI() {
         setPulsingGlow([235,235,103]);
     }
 
-    // Update inventory list (left column)
+        // Update inventory list (left column) using gachaDuplicates
     const inventoryList = document.getElementById("inventoryList");
     inventoryList.innerHTML = "";
-    playerData.inventory.forEach(skinNameStr => {
-        const skin = skins.find(s => s.name === skinNameStr);
+
+    // Get all owned skin IDs from gachaDuplicates
+    const ownedSkinIds = playerData.gachaDuplicates ? Object.keys(playerData.gachaDuplicates).map(id => parseInt(id)) : [];
+
+    ownedSkinIds.forEach(skinId => {
+        const skin = skins.find(s => s.id === skinId);
         if (!skin) return;
 
         const itemDiv = document.createElement("div");
@@ -902,7 +914,8 @@ function updateUI() {
         itemDiv.style.cursor = "pointer";
         itemDiv.style.borderRadius = "5px";
 
-        if (playerData.equippedSkin === skin.name) {
+        // Highlight equipped skin
+        if (playerData.equippedSkin === skin.id) {
             itemDiv.style.backgroundColor = "#eaa04cdc"; // highlight equipped
         }
 
@@ -928,156 +941,126 @@ function updateUI() {
         inventoryList.appendChild(itemDiv);
 
         itemDiv.addEventListener("click", () => {
-            playerData.equippedSkin = skin.name;
+            playerData.equippedSkin = skin.id;
             updateUI();
         });
     });
+        
 
-    // Update rarity pie chart (right column)
-    const canvas = document.getElementById("rarityPie");
-    const ctx = canvas.getContext("2d");
-
-    // Add padding so hover slices aren't cut off
-    const padding = 20;
-    canvas.width = canvas.offsetWidth - padding*2;
-    canvas.height = canvas.offsetHeight - padding*2;
-    const radius = Math.min(canvas.width, canvas.height) / 2;
-    const centerX = canvas.width / 2 + padding;
-    const centerY = canvas.height / 2 + padding;
-
-    // Count rarities
-    const rarityCount = { "Common":0, "Uncommon":0, "Rare":0, "Epic":0, "Legendary":0 };
-    playerData.inventory.forEach(name => {
-        const skin = skins.find(s => s.name === name);
-        if (skin) rarityCount[skin.rarity]++;
-    });
-
-    const total = Object.values(rarityCount).reduce((a,b)=>a+b,0);
-    let startAngle = -Math.PI / 2;
-    const slices = [];
-
-    Object.keys(rarityCount).forEach(rarity => {
-        const count = rarityCount[rarity];
-        if(count === 0) return;
-        const sliceAngle = (count/total) * 2 * Math.PI;
-        slices.push({rarity, startAngle, endAngle: startAngle + sliceAngle});
-        startAngle += sliceAngle;
-    });
+    
 
     function drawRarityPie() {
-    const canvas = document.getElementById("rarityPie");
-    const container = document.getElementById("pieContainer");
-    const label = document.getElementById("pieLabel");
-    const ctx = canvas.getContext("2d");
+        const container = document.getElementById("pieContainer");
+        const canvas = document.getElementById("rarityPie");
+        const ctx = canvas.getContext("2d");
+        const label = document.getElementById("pieLabel");
 
-    const containerWidth = container.clientWidth;
-    const containerHeight = container.clientHeight;
-    const padding = 20; // padding around the chart
+        const padding = 20;
+        const pieSize = Math.min(container.clientWidth, container.clientHeight) - padding*2;
 
-    // Perfect square minus padding
-    const size = Math.min(containerWidth, containerHeight) - padding * 2;
-    canvas.width = size + padding * 2;
-    canvas.height = size + padding * 2;
-    canvas.style.width = canvas.width + "px";
-    canvas.style.height = canvas.height + "px";
+        canvas.width = pieSize;
+        canvas.height = pieSize;
+        canvas.style.width = canvas.width + "px";
+        canvas.style.height = canvas.height + "px";
 
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
-    const radius = size / 2;
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const radius = pieSize / 2 - padding;
 
-    // Count rarities
-    const rarityCount = { "Common":0, "Uncommon":0, "Rare":0, "Epic":0, "Legendary":0 };
-    playerData.inventory.forEach(name => {
-        const skin = skins.find(s => s.name === name);
-        if(skin) rarityCount[skin.rarity]++;
-    });
-    const total = Object.values(rarityCount).reduce((a,b)=>a+b,0);
+        // Count rarities
+        const rarityCount = { "Common":0, "Uncommon":0, "Rare":0, "Epic":0, "Legendary":0 };
+        if (playerData.gachaDuplicates) {
+            Object.entries(playerData.gachaDuplicates).forEach(([id, count]) => {
+                const skin = skins.find(s => s.id === parseInt(id));
+                if (skin) rarityCount[skin.rarity] += count;
+            });
+        }
 
-    let startAngle = -Math.PI/2;
-    const slices = [];
+        const total = Object.values(rarityCount).reduce((a,b)=>a+b,0);
+        if(total === 0) return; // nothing to draw
 
-    Object.keys(rarityCount).forEach(rarity=>{
-        const count = rarityCount[rarity];
-        if(count===0) return;
-        const sliceAngle = (count/total)*2*Math.PI;
-        slices.push({rarity, startAngle, endAngle: startAngle+sliceAngle});
-        startAngle += sliceAngle;
-    });
-
-    function render(highlight=null){
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        slices.forEach(slice=>{
-            const mid = (slice.startAngle+slice.endAngle)/2;
-            const r = (slice.rarity===highlight)? radius*1.1 : radius;
-            ctx.beginPath();
-            ctx.moveTo(centerX, centerY);
-            ctx.arc(centerX, centerY, r, slice.startAngle, slice.endAngle);
-            ctx.closePath();
-            ctx.fillStyle = rarityColors[slice.rarity]||"#000";
-            ctx.fill();
+        let startAngle = -Math.PI / 2;
+        const slices = [];
+        Object.keys(rarityCount).forEach(rarity => {
+            const count = rarityCount[rarity];
+            if(count === 0) return;
+            const sliceAngle = (count / total) * 2 * Math.PI;
+            slices.push({rarity, startAngle, endAngle: startAngle + sliceAngle});
+            startAngle += sliceAngle;
         });
+
+        function render(highlight=null){
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            slices.forEach(slice=>{
+                const r = (slice.rarity===highlight) ? radius*0.95 : radius; // slightly smaller when not hovered
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.arc(centerX, centerY, r, slice.startAngle, slice.endAngle);
+                ctx.closePath();
+                ctx.fillStyle = rarityColors[slice.rarity] || "#000";
+                ctx.fill();
+            });
+        }
+
+        render();
+
+        canvas.onmousemove = (e)=>{
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            const x = mouseX - centerX;
+            const y = mouseY - centerY;
+            let angle = Math.atan2(y,x);
+            if(angle < -Math.PI/2) angle += 2*Math.PI;
+
+            let hovered = null;
+            slices.forEach(slice=>{
+                if(angle >= slice.startAngle && angle <= slice.endAngle) hovered = slice.rarity;
+            });
+
+            render(hovered);
+
+            if(hovered){
+                label.innerText = `${hovered}: ${rarityCount[hovered]}`;
+                label.style.left = Math.min(mouseX + 10, canvas.width - 80) + "px";
+                label.style.top = Math.max(mouseY - 20, 0) + "px";
+                label.style.color = "navy";
+            } else {
+                label.innerText = "";
+            }
+        };
+
+        canvas.onmouseleave = () => { render(); label.innerText=""; }
     }
 
-    render();
-
-    canvas.onmousemove = (e)=>{
-        const rect = canvas.getBoundingClientRect();
-        const mouseX = e.clientX - rect.left;
-        const mouseY = e.clientY - rect.top;
-        const x = mouseX - centerX;
-        const y = mouseY - centerY;
-        let angle = Math.atan2(y,x);
-        if(angle<-Math.PI/2) angle+=2*Math.PI;
-
-        let hovered = null;
-        slices.forEach(slice=>{
-            if(angle>=slice.startAngle && angle<=slice.endAngle) hovered = slice.rarity;
-        });
-
-        render(hovered);
-
-        if(hovered){
-            label.innerText = `${hovered}: ${rarityCount[hovered]}`;
-            // Keep label inside container
-            label.style.left = Math.min(mouseX + 10, canvas.width - 80) + "px";
-            label.style.top = Math.max(mouseY - 20, 0) + "px";
-            label.style.color = "navy";
-        } else {
-            label.innerText = "";
-        }
-    };
-
-    canvas.onmouseleave = ()=>{render(); label.innerText="";}
-}
-
-// Call on inventory update
-drawRarityPie();
-
-// Redraw on window resize
-window.addEventListener("resize", drawRarityPie);
+    // Call it
+    drawRarityPie();
+    window.addEventListener("resize", drawRarityPie);
 
 }
 
-// Load playerData from localStorage or JSON
-const savedData = localStorage.getItem("playerData");
-if (savedData) {
-    playerData = JSON.parse(savedData);
-    updateUI();
-} else {
-    fetch("inventoryTest.json")
-        .then(r => r.json())
-        .then(data => {
-            playerData = data;
-            updateUI();
-        });
+async function saveProgress() {
+    if (!playerData || !currentUser) return;
+
+    const res = await fetch("/saveProgress", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            username: currentUser.username,   // from login
+            progress: playerData
+        })
+    });
+
+    const data = await res.json();
+    if (data.success) {
+        alert("Progress saved to server!");
+    } else {
+        alert("Error saving progress: " + data.message);
+    }
 }
 
-// Save button
-saveButton.addEventListener("click", () => {
-    if (!playerData) return;
-    localStorage.setItem("playerData", JSON.stringify(playerData));
-    alert("Progress saved!");
-});
+// Attach to save button
+saveButton.addEventListener("click", saveProgress);
 
 
 gachaButton.addEventListener("click", () => {
@@ -1088,7 +1071,7 @@ gachaButton.addEventListener("click", () => {
     gachaHelperText.style.color = "red";
     return;
 }
-
+    playerData.tokens--;
     let roll = Math.random() * 100;
     let total = 0;
     let chosenRarity = "Common";
@@ -1112,26 +1095,35 @@ gachaButton.addEventListener("click", () => {
     const rarityChance = chances.find(t => t.rarity === chosenSkin.rarity).chance;
     skinChance.innerText = "Chance: " + (rarityChance).toFixed(2) + "%";
 
-    // Update playerData
-    playerData.tokens--;
-    let isNew = false;
-    if (!playerData.inventory.includes(chosenSkin.name)) {
-    playerData.inventory.push(chosenSkin.name);
-    skinNewText.innerText = "New!";
-    skinNewText.style.color = "#4cff4c"; // nice green
-    isNew = true;
+    const skinId = chosenSkin.id;
+
+    // Increment gachaDuplicates for this id
+    if (!playerData.gachaDuplicates) playerData.gachaDuplicates = {};
+    playerData.gachaDuplicates[skinId] = (playerData.gachaDuplicates[skinId] || 0) + 1;
+
+    // Add to gachaHistory
+    if (!playerData.gachaHistory) playerData.gachaHistory = [];
+    playerData.gachaHistory.push(skinId);
+
+    // Determine if this is new
+    if (playerData.gachaDuplicates[skinId] === 1) {
+        skinNewText.innerText = "New!";
+        skinNewText.style.color = "#4cff4c"; // green
     } else {
         skinNewText.innerText = "Already Owned";
         skinNewText.style.color = "white";
-    }
+}
 
-    // Add to gacha history
-    gachaHistory.unshift({ name: chosenSkin.name, rarity: chosenSkin.rarity, owned: playerData.inventory.includes(chosenSkin.name) });
-    if (gachaHistory.length > maxHistory) gachaHistory.pop();
+    // Add to gacha history (store only the skin id)
+    gachaHistory.unshift({ id: chosenSkin.id }); // keep forever
 
-    // Update history panel (left column)
-    gachaHistoryPanel.innerHTML = "<h3>Pull History</h3>"; // reset
-    gachaHistory.forEach(skin => {
+    // Display only the last maxHistory pulls
+    gachaHistoryPanel.innerHTML = "<h3>Pull History</h3>";
+
+    gachaHistory.slice(0, maxHistory).forEach(entry => {
+        const skinData = skins.find(s => s.id === entry.id);
+        if (!skinData) return;
+
         const div = document.createElement("div");
         div.style.display = "flex";
         div.style.gap = "15px";
@@ -1139,19 +1131,19 @@ gachaButton.addEventListener("click", () => {
         div.style.justifyContent = "space-between";
         div.style.padding = "4px 6px";
         div.style.borderRadius = "5px";
-        div.style.backgroundColor = skin.owned ? "#2b2b3a" : "#3a1b1b"; // slightly different if owned
-        div.style.color = rarityColors[skin.rarity] || "#fff";
-        const skinData = skins.find(s => s.name === skin.name);
+        div.style.backgroundColor = "#2b2b3a"; // just one color for all, duplicates included
+        div.style.color = rarityColors[skinData.rarity] || "#fff";
 
         div.innerHTML = `
-        <span style="color: rgb(${skinData.rgb[0]},${skinData.rgb[1]},${skinData.rgb[2]}); font-weight:bold;">
-        ${skin.name}
-        </span>
-        
-        <span style="color:${rarityColors[skin.rarity]}; font-weight:bold;">
-        ${skin.rarity}
-        </span>`
-        ;gachaHistoryPanel.appendChild(div);
+            <span style="color: rgb(${skinData.rgb[0]},${skinData.rgb[1]},${skinData.rgb[2]}); font-weight:bold;">
+                ${skinData.name}
+            </span>
+            <span style="color:${rarityColors[skinData.rarity]}; font-weight:bold;">
+                ${skinData.rarity}
+            </span>
+        `;
+
+        gachaHistoryPanel.appendChild(div);
     });
 
     updateUI(); // refresh XP circle & tokens
@@ -1168,9 +1160,9 @@ const y = Math.random() * window.innerHeight;
 sparkle.style.left = x + "px";
 sparkle.style.top = y + "px";
 
-const size = Math.random() * 6 + 6;
-sparkle.style.width = size + "px";
-sparkle.style.height = size + "px";
+const sparkleSize = Math.random() * 6 + 6;
+sparkle.style.width = sparkleSize + "px";
+sparkle.style.height = sparkleSize + "px";
 
 document.body.appendChild(sparkle);
 
@@ -1352,7 +1344,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     playerData.tokens -= 1
                 }
                 updateUI();
-                token_disp.textContent = playerData.tokens
+                
                 // add to some sort of tracker of tasks completed during a pomo
             });
 
@@ -1459,6 +1451,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 // add button to clear toggled tasks
+updateUI();
 
 // end of timer section
 </script>

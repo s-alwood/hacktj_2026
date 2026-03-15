@@ -1,0 +1,50 @@
+{
+    "test": {
+        "password": "test",
+        "tokens": 10,
+        "level": 1,
+        "xpProgress": 0,
+        "equippedSkin": "Basic Yellow",
+        "inventory": [
+            "Basic Yellow"
+        ],
+        "gachaDuplicates": {"1":1,"2":2,"4":2,"7":1,"203":1,"301":1},
+        "gachaHistory": [7,2,4,203,1,4,2,301]
+    },
+    "tests": {
+        "password": "t",
+        "tokens": 10,
+        "level": 1,
+        "xpProgress": 0,
+        "equippedSkin": 7,
+        "gachaDuplicates": {"1":1,"2":2,"4":1,"7":1,"102":1,"104":1,"203":1},
+        "gachaHistory": [102,203,2,104,7,2,1,4]
+    },
+    "stupd": {
+        "password": "stu",
+        "tokens": 10,
+        "level": 1,
+        "xpProgress": 0,
+        "equippedSkin": 1,
+        "gachaDuplicates": {},
+        "gachaHistory": []
+    },
+    "xp prog": {
+        "password": "a",
+        "tokens": 10,
+        "level": 1,
+        "xpProgress": 4.599999999999993,
+        "equippedSkin": 1,
+        "gachaDuplicates": {"8":1,"106":1,"204":1,"303":1},
+        "gachaHistory": [303,8,106,204]
+    },
+    "xp progs": {
+        "password": "a",
+        "tokens": 0,
+        "level": 2,
+        "xpProgress": 2.3000000000003538,
+        "equippedSkin": 202,
+        "gachaDuplicates": {"1":4,"2":3,"3":1,"4":1,"5":1,"6":1,"7":3,"8":2,"103":1,"106":1,"202":3},
+        "gachaHistory": [1,1,103,7,202,8,2,7,4,2,1,202,1,8,2,3,5,106,6,7,202]
+    }
+}
